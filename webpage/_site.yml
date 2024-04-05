@@ -1,7 +1,0 @@
-name: "Biostatistics_course"
-output_dir: "."
-navbar:
-  title: "Biostatistics Course"
-  left:
-    - text: "Home"
-      href: index.html
