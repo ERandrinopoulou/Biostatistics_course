@@ -37,7 +37,7 @@ In this webpage, you can find the material of the Biostatistics I and II (NIHES 
 
 ## Demos
 
-### Code
+#### Code
 
 [Basics](Demos\Biostatistics I\01_Basics.R)
 
@@ -61,7 +61,7 @@ In this webpage, you can find the material of the Biostatistics I and II (NIHES 
 [Extra Programming Examples](Demos\Biostatistics I\Extra_Programming_Examples.R)
 
 
-### Output
+#### Output
 
 [Basics](Demos\Biostatistics I\01_Basics.html)
 
@@ -123,6 +123,13 @@ In this webpage, you can find the material of the Biostatistics I and II (NIHES 
 
 ## Demos
 
+#### Code
+
+[Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.R)
+
+
+#### Output
+
 [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.html)
 
 
@@ -143,6 +150,15 @@ In this webpage, you can find the material of the Biostatistics I and II (NIHES 
 [McNemar Test](Slides\Biostatistics I\McNemar_Test.pdf)
 
 ## Demos
+
+#### Code
+
+[Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.R)
+
+
+[Statistical Tests Categorical Data partII](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partIÌ.R)
+
+#### Output
 
 [Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
 
