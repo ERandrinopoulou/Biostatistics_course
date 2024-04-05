@@ -16,7 +16,9 @@ In this webpage, you can find the material of the Biostatistics I and II (NIHES 
  
 Introduction to R 
  
-[Introduction](Z:\Courses\Biostatistical Methods\Slides\Biostatistics I\Introduction.pdf)
+[Introduction](Slides\Biostatistics I\Introduction.pdf)
 
 Statistical tests
+
+<a href="Slides/Biostatistics I/Introduction.pdf" class="image fit"><img src="images/marr_pic.jpg" alt=""></a>
 
