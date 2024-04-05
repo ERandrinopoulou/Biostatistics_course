@@ -1,0 +1,485 @@
+---
+title: "Biostatistics I: Introduction to R"
+subtitle: 'Data transformation, exploration and visualization'
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation:
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: no
+  slidy_presentation:
+    incremental: no
+classoption: aspectratio=169
+---
+
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+## In this Section
+
+* Data transformation
+
+* Data exploration
+
+* Data visualization 
+
+* A lot of practice
+
+
+## Data Transformation
+
+\blue{You will never receive the perfect data set!}
+
+* \blue{Round} continuous variables
+* Convert \blue{numeric} variables to \blue{factors}
+* Compute \blue{new variables}
+  - transform variables
+* \blue{Sort} the data set
+* Data sets of \blue{wide} $\Longleftrightarrow$ \blue{long} format
+
+
+## Data Transformation  
+
+* \blue{Round} continuous variables
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+pbc[1:3, c("time", "age", "bili", "chol")]
+round(pbc[1:3, c("time", "age", "bili", "chol")], digits = 2)
+```
+
+
+## Data Transformation  
+
+* Convert \blue{numeric} variables to \blue{factors}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF <- pbc[,c("id", "time", "status", "trt", "age", 
+                    "sex", "bili", "chol")]
+head(DF)
+```
+
+
+## Data Transformation  
+
+* Convert \blue{numeric} variables to \blue{factors}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF <- pbc[,c("id", "time", "status", "trt", "age", 
+                    "sex", "bili", "chol")]
+DF$trt <- factor(x = DF$trt, levels = c(1, 2), 
+                 labels = c("D-penicillmain", "placebo"))
+head(DF)
+```
+
+
+## Data Transformation  
+
+* Compute \blue{new variables}
+  - transform variables
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF <- pbc[,c("id", "time", "status", "trt", "age", 
+                    "sex", "bili", "chol")]
+head(DF)
+``` 
+
+
+## Data Transformation  
+
+* Compute \blue{new variables}
+  - transform variables
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF <- pbc[,c("id", "time", "status", "trt", "age", 
+                    "sex", "bili", "chol")]
+DF$time <- DF$time/30
+DF$time_years <- DF$time/12
+head(DF)
+``` 
+  
+  
+## Data Transformation  
+
+* \blue{Sort} the data set in either ascending or descending order
+  * The variable by which we sort can be a numeric, string or factor 
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+head(sort(pbc$bili))
+``` 
+
+
+## Data Transformation  
+
+* \blue{Sort} the data set in either ascending or descending order
+  * The variable by which we sort can be a numeric, string or factor 
+```{r, eval = TRUE, include = TRUE, echo = TRUE, size = "footnotesize"}
+head(pbc[order(pbc$bili), ])
+``` 
+
+
+## Data Transformation  
+
+* \blue{Sort} the data set in either ascending or descending order
+  * The variable by which we sort can be a numeric, string or factor 
+```{r, eval = TRUE, include = TRUE, echo = TRUE, size = "footnotesize"}
+head(pbc[order(pbc$bili, pbc$age), ])
+```
+
+
+## Data Transformation  
+
+* Data sets of \blue{wide} $\Longleftrightarrow$ long format  
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+head(pbc[,c("id", "time", "status", "trt", "age", 
+                    "sex", "bili", "chol")])
+```  
+  
+  
+## Data Transformation  
+
+* Data sets of wide $\Longleftrightarrow$ \blue{long} format  
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+head(pbcseq[, c("id", "futime", "status", "trt", "age", "day",
+                    "sex", "bili", "chol")])
+```  
+  
+
+## Data Transformation  
+
+* Data sets of \blue{wide} $\Longleftrightarrow$ \blue{long} format  
+```{r, eval = FALSE, include = TRUE, echo = TRUE}
+?reshape
+```
+
+
+
+## Data Exploration
+
+* Common questions for the pbc data set
+  - What is the mean and standard deviation for age?
+  - What is the mean and standard deviation for time?
+  - What is the median and interquartile range for age?
+  - What is the percentage of placebo patients?
+  - What is the percentage of females?
+  - What is the mean and standard deviation for age in males?
+  - What is the mean and standard deviation for baseline serum bilirubin?
+  - What is the percentage of missings in serum bilirubin?
+  
+\vspace*{0.3cm}
+
+\blue{All these questions can be answered using R!}
+
+
+## Data Exploration  
+
+* \blue{Hints}
+
+\vspace*{3ex}  
+    - Check functions: \blue{mean(...)}, \blue{sd(...)}, \blue{percent(...)}, \blue{median(...)}, \blue{IQR(...)}, \blue{table(...)}
+
+\pause
+\vspace*{3ex} 
+
+What is the mean value for age?
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mean(pbc$age)
+```  
+ 
+
+
+## Data Visualization
+
+* It is important to investigate each variable in our data set using plots
+  - Descriptive statistics for continuous and categorical variables
+  - Distributions of variables
+  - Distributions of variables per group
+  - Extreme values
+  - Linear/nonlinear evolutions
+
+<!-- https://genomicsclass.github.io/book/pages/plots_to_avoid.html -->
+  
+## Data Visualization
+\blue{Take care!}
+```{r, eval = TRUE, include = TRUE, echo = FALSE, fig.height = 10, fig.width = 15}
+pie(table(pbc$bili), cex = 0.8, main = "Serum bilirubin")
+```
+
+
+## Data Visualization
+\blue{Take care!}
+```{r, eval = TRUE, include = TRUE, echo = FALSE, fig.height = 7, fig.width = 15}
+pbcseq.id <- pbcseq[tapply(row.names(pbcseq), pbcseq$id, tail, 1), ]
+pbcseq.idBase <- pbcseq[tapply(row.names(pbcseq), pbcseq$id, head, 1), ]
+
+pbcseq.id$BA <- "Last"
+pbcseq.idBase$BA <- "First"
+
+pbcFL <- rbind(pbcseq.idBase, pbcseq.id)
+pbcFL <- pbcFL[order(pbcFL$id, pbcFL$day),]
+library(lattice)
+p1 <- xyplot(bili ~ as.factor(BA), group = id, data = pbcFL[pbcFL$id %in% c(1, 24, 25, 6, 34, 17, 45, 23), ], 
+             type = c("p", "l"), pch = 16,
+             xlab = "", ylab = list("Serum bilirubin", cex = 1.3), col = "#C443AF",
+       scales = list(x = list(limits = c(0.9,2.1), at = c(1,2), cex = 1.2, 
+                          labels = c("First", "Last")), y = list(cex = 1.2) ))
+p2 <- bwplot(bili ~ as.factor(BA), data = pbcFL[pbcFL$id %in% c(1, 24, 25, 6, 34, 17, 45, 23), ],
+            ylab = list("Serum bilirubin", cex = 1.3), xlab = "", 
+            scales = list(x = list(cex = 1.2), y = list(cex = 1.2)),
+            par.settings = list(box.umbrella = list(col= c("#C443AF")), 
+                                    box.dot = list(col= c("#C443AF")), 
+                                    box.rectangle = list(col= c("#C443AF"))))
+
+print(p1, split = c(1,1,2,1), more = TRUE)
+print(p2, split = c(2,1,2,1))
+```
+
+
+## Data Visualization
+
+\blue{Take care!}
+```{r, eval = TRUE, include = TRUE, echo = FALSE, fig.width = 4, fig.height = 3}
+library(lattice)
+xyplot(bili ~ as.factor(BA), group = id, data = pbcFL[pbcFL$id %in% c(45, 6), ], 
+       type = c("p", "l"), pch = 16, 
+       xlab = "", ylab = list("Serum bilirubin", cex = 0.9), col = "#C443AF",
+       scales = list(x = list(limits = c(0.9,2.1), at = c(1,2), cex = 0.8, 
+                          labels = c("First", "Last")), y = list(cex = 0.8, draw = FALSE) ))
+```
+
+## Data Visualization
+
+\blue{Take care!}
+```{r, eval = TRUE, include = TRUE, echo = FALSE, fig.width = 4, fig.height = 3}
+library(lattice)
+xyplot(bili ~ as.factor(BA), group = id, data = pbcFL[pbcFL$id %in% c(45, 6), ], 
+       type = c("p", "l"), pch = 16, 
+       xlab = "", ylab = list("Serum bilirubin", cex = 0.9), col = "#C443AF",
+       scales = list(x = list(limits = c(0.9,2.1), at = c(1,2), cex = 0.8, 
+                          labels = c("First", "Last")), y = list(cex = 0.8) ))
+```
+
+
+## Data Visualization
+
+\blue{Take care!}
+```{r, eval = TRUE, include = TRUE, echo = FALSE, fig.width = 4, fig.height = 3}
+library(lattice)
+xyplot(bili ~ as.factor(BA), group = id, data = pbcFL[pbcFL$id %in% c(45, 6), ], 
+       type = c("p", "l"), pch = 16, 
+       xlab = "", ylab = list("Serum bilirubin", cex = 0.9), col = "#C443AF",
+       ylim = c(0, 28), 
+       scales = list(x = list(limits = c(0.9,2.1), at = c(1,2), cex = 0.8, 
+                          labels = c("First", "Last")), y = list(cex = 0.8, limits = c(0, 28)) ))
+```
+
+
+## Data Visualization  
+
+* R has very powerful graphics capabilities
+* Some good references are
+  - Murrel, P. (2005) R Graphics. Boca Raton: Chapman & Hall/CRC.
+  - Sarkar, D. (2008) Lattice Multivariate Data Visualization with R. New York: Springer-Verlag.
+
+
+## Data Visualization  
+
+* Traditional graphics system
+  - package \blue{graphics}
+* Trellis graphics system
+  - package \blue{lattice} (which is based on package grid)
+* Grammar of Graphics implementation (i.e., Wilkinson, L. (1999) The Grammar of Graphics. New York: Springer-Verlag)
+  - packages \blue{ggplot} & \blue{ggplot2}
+
+
+## Data Visualization  
+
+Important plotting basic functions
+
+* \blue{plot()}: scatter plot (and others)
+* \blue{barplot()}: bar plots
+* \blue{boxplot()}: box-and-whisker plots
+* \blue{hist()}: histograms
+* \blue{dotchart()}: dot plots
+* \blue{pie()}: pie charts
+* \blue{qqnorm()}, \blue{qqline()}, \blue{qqplot()}: distribution plots
+* \blue{pairs()}: for multivariate data
+
+
+## Data Visualization  
+
+Continuous variables
+```{r, eval = TRUE, include = TRUE, echo = TRUE, fig.height = 6, fig.width = 15}
+plot(x = pbc$age, y = pbc$bili)
+```
+
+
+## Data Visualization  
+
+Continuous variables
+```{r, eval = TRUE, include = TRUE, echo = TRUE, fig.height = 6, fig.width = 15}
+plot(x = pbc$age, y = pbc$bili, xlab = "age", ylab = "bili", 
+     cex.lab = 1.9, cex.axis = 1.5)
+```  
+
+
+## Data Visualization  
+
+Continuous variables
+```{r, eval = TRUE, include = TRUE, echo = TRUE, fig.height = 6, fig.width = 15}
+plot(x = pbc$age, y = pbc$bili, xlab = "age", ylab = "bili", 
+     cex.lab = 1.9, cex.axis = 1.5, col = "red")
+```  
+
+
+## Data Visualization  
+
+* For more options check 
+```{r, eval = FALSE, include = TRUE, echo = TRUE, fig.height = 6, fig.width = 15}
+?plot
+```  
+
+
+## Data Visualization  
+
+Continuous variables per group
+```{r, eval = TRUE, include = TRUE, echo = TRUE, fig.height = 6, fig.width = 15}
+plot(x = pbc$age, y = pbc$bili, xlab = "age", ylab = "bili", 
+     cex.lab = 1.9, cex.axis = 1.5, col = pbc$sex)
+```  
+
+
+## Data Visualization  
+
+Continuous variables per group
+```{r, eval = TRUE, include = TRUE, echo = TRUE, fig.height = 6, fig.width = 15}
+boxplot(formula = pbc$age ~ pbc$sex, xlab = "sex", ylab = "age", 
+     cex.lab = 1.9, cex.axis = 1.5)
+```  
+
+## Data Visualization  
+
+Continuous variables per group
+```{r, eval = FALSE, include = TRUE, echo = TRUE, fig.height = 3.5, fig.width = 15}
+pbc_male_bili <- pbc$bili[pbc$sex == "m"]
+pbc_female_bili <- pbc$bili[pbc$sex == "f"]
+plot(density(x = pbc_male_bili), col = rgb(0,0,1,0.5), 
+     main = "Density plots", xlab = "bili", ylab = "")
+lines(density(x = pbc_female_bili), col = rgb(1,0,0,0.5))
+legend(x = 8, y = 0.2, legend = c("male", "female"), 
+       col = c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), lty = 1)
+```  
+
+
+## Data Visualization  
+
+Continuous variables per group
+```{r, eval = TRUE, include = TRUE, echo = FALSE, fig.height = 6, fig.width = 15}
+pbc_male_bili <- pbc$bili[pbc$sex == "m"]
+pbc_female_bili <- pbc$bili[pbc$sex == "f"]
+plot(density(x = pbc_male_bili), col = rgb(0,0,1,0.5), 
+     main = "Density plots", xlab = "bili", ylab = "")
+lines(density(x = pbc_female_bili), col = rgb(1,0,0,0.5))
+legend(x = 8, y = 0.2, legend = c("male", "female"), 
+       col = c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), lty = 1)
+```
+
+## Data Visualization  
+
+Continuous variables per group
+```{r, eval = FALSE, include = TRUE, echo = TRUE, fig.height = 3.5, fig.width = 15}
+pbc_male_bili <- pbc$bili[pbc$sex == "m"]
+pbc_female_bili <- pbc$bili[pbc$sex == "f"]
+plot(density(x = pbc_male_bili), col = rgb(0,0,1,0.5), 
+     main = "Density plots", xlab = "bili", ylab = "")
+polygon(density(x = pbc_male_bili), col = rgb(0,0,1,0.5), 
+        border = "blue")
+lines(density(x = pbc_female_bili), col = rgb(1,0,0,0.5))
+polygon(density(x = pbc_female_bili), col = rgb(1,0,0,0.5), 
+        border = "red")
+legend(x = 8, y = 0.2, legend = c("male", "female"), 
+       col = c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), lty = 1)
+```  
+
+
+## Data Visualization  
+
+Continuous variables per group
+```{r, eval = TRUE, include = TRUE, echo = FALSE, fig.height = 6, fig.width = 15}
+pbc_male_bili <- pbc$bili[pbc$sex == "m"]
+pbc_female_bili <- pbc$bili[pbc$sex == "f"]
+plot(density(x = pbc_male_bili), col = rgb(0,0,1,0.5), 
+     main = "Density plots", xlab = "bili", ylab = "")
+polygon(density(x = pbc_male_bili), col = rgb(0,0,1,0.5), 
+        border = "blue")
+lines(density(x = pbc_female_bili), col = rgb(1,0,0,0.5))
+polygon(density(x = pbc_female_bili), col = rgb(1,0,0,0.5), 
+        border = "red")
+legend(x = 8, y = 0.2, legend = c("male", "female"), 
+       col = c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), lty = 1)
+``` 
+
+
+## Data Visualization  
+
+Categorical variables 
+```{r, eval = TRUE, include = TRUE, echo = TRUE, fig.height = 5, fig.width = 15}
+pbc$status <- factor(x = pbc$status, levels = c(0, 1, 2), 
+                     labels = c("censored", "transplant", "dead"))
+pie(table(pbc$status), col = c("green", "blue", "red"), cex = 2)
+``` 
+
+
+
+
+## Summary
+
+\begin{columns}[onlytextwidth,T]
+\begin{column}{0.30\linewidth}
+
+
+\blue{Transformation}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{round()}
+\item \texttt{factor()}
+\item \texttt{order()}
+\item \texttt{reshape()}
+\end{itemize}
+\end{column}
+
+\begin{column}{0.30\linewidth}
+\blue{Exploration}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{mean()}, \texttt{sd()}
+\item \texttt{median()}, \texttt{IQR()}
+\item \texttt{table()}
+\end{itemize}
+\end{column}
+
+\begin{column}{0.30\linewidth}
+\blue{Visualization}
+\begin{itemize}
+\item \texttt{plot()}, \texttt{legend()}
+\item \texttt{hist()}
+\item \texttt{barchart()}
+\item \texttt{boxplot()}
+\item \texttt{xyplot()}, \texttt{ggplot()}
+\item \texttt{par()}
+\end{itemize}
+\end{column}
+
+\end{columns}
+

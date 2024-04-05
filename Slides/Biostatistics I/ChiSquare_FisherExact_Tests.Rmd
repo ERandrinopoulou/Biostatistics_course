@@ -1,0 +1,705 @@
+---
+title: "Biostatistics I: Hypothesis testing"
+subtitle: "Categorical data: Chi-square and Fisher's exact tests"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+
+* Chi-square test
+
+* Fisher's exact test 
+
+* Examples
+
+
+ 
+## Chi-square test: Theory   
+
+\blue{Assumptions}
+
+* The study groups must be independent
+* There are 2 variables, and both are measured as categories, usually at the nominal level
+* The levels (or categories) of the variables are mutually exclusive
+
+
+
+## Chi-square test: Theory 
+
+The chi-square test tests the statistical significance of the observed relationship with respect to the expected relationship
+
+* Two variables are related or independent
+* Goodness-of-fit between observed distribution and theoretical distribution of frequencies
+
+
+## Chi-square test: Theory 
+
+\blue{Scenario} 
+
+Is there a relationship between gender and whether or not someone followed an online course? 
+
+\blue{Hypothesis} 
+
+$H_0$: there is not association between gender and whether someone followed an online course \newline
+$H_1$: there is an association between gender and whether someone followed an online course
+
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+If a chi-square goodness of fit test is performed then:
+The null and alternative hypotheses for our goodness of fit test reflect the assumption that we are making about the population
+}
+
+\end{tcolorbox}
+
+
+## Chi-square test: Theory 
+
+\blue{Connection with linear regression}
+
+Let's assume a 2x2 table with variable $A$ ($i$-th categories) and variable $B$ ($j$-th categories). A multiplicative model that reproduces the cell frequencies exactly is:
+
+$n_{ij} = N *\alpha_i * \beta_j * \alpha\beta_{ij}$ 
+where 
+
+- $\alpha_i:$ the main effect of variable A at category $i$ 
+- $\beta_j:$ the main effect of variable B at category $j$ 
+- $\alpha\beta_{ij}:$ interaction between the two variables
+- $N:$ total number of subjects
+
+<!-- ## Chi-square test: Theory  -->
+
+<!-- For example, -->
+
+<!-- ```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE} -->
+<!-- set.seed(2021) -->
+<!-- x1 <- sample(0:1, 100, replace = TRUE) -->
+<!-- x2 <- sample(0:1, 100, replace = TRUE) -->
+
+<!-- tab <- table(x1, x2) -->
+
+<!-- colnames(tab) <- c("Yes: online course", "No: online course") -->
+<!-- rownames(tab) <- c("Male", "Female") -->
+
+<!-- library(knitr) -->
+<!-- kable(addmargins(tab)) -->
+<!-- ``` -->
+
+<!-- $n_{11} = 100 * (47/100) * (62/100) * (33/47/62*100) = 33$ -->
+
+If we take the logarithm of both sides, we can rewrite it as:
+
+$log(n_{ij}) = log(N) + log(\alpha_i) + log(\beta_j) + \log(\alpha\beta_{ij})$,
+\newline
+which is a log-linear model
+
+
+## Chi-square test: Theory 
+
+\blue{Test statistic} 
+
+- We must know the observed and expected values
+- The test statistic is:
+  $X^2 = \sum_{i=1}^K \frac{(O_i-E_i)^2}{E_i}$,\
+where $K$ are the contingency table cells, $O$ is the observed value and $E$ the expected value.
+   
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+When the values in the contingency table are fairly small a “correction for continuity” known as the “Yates’ correction” may be applied to the test statistic:
+ $X^2 = \sum_{i=1}^K \frac{(|O_i-E_i| - 1/2)^2}{E_i}$
+}
+
+\end{tcolorbox}
+
+
+## Chi-square test: Theory 
+
+\blue{Sampling distribution}
+
+- $\chi^2$-distribution with $df = (number \ of \ rows - 1) * (number \ of \ columns - 1)$ 
+- Critical value and p-value
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If a chi-square goodness of fit test is performed then:\newline
+$df = number\ of\ categories - 1$
+
+}
+
+\end{tcolorbox}
+
+
+
+## Chi-square test: Theory 
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($X^2$) with the critical value or the p-value with $\alpha$
+
+
+
+
+
+
+
+
+## Chi-square test: Application 
+
+\blue{Scenario} 
+
+Is there a relationship between gender and whether or not someone followed an online course? 
+
+\blue{Hypothesis}
+
+$H_0:$ there is not association between gender and whether someone followed an online course \newline
+$H_1:$ there is an association between gender and whether someone followed an online course
+
+
+## Chi-square test: Application 
+
+\blue{Collect and visualize data}
+
+Observed:
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(2021)
+x1 <- sample(0:1, 100, replace = TRUE)
+x2 <- sample(0:1, 100, replace = TRUE)
+
+tab <- table(x1, x2)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+kable(addmargins(tab))
+```
+
+Expected:
+
+For each cell we calculate =
+
+(total number of obs for the row) * (total number of obs for the column) / (total number of obs)
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(29.1, 17.9, 32.9, 20.1)
+
+tab <- matrix(x, 2, 2, byrow = T)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+kable(tab)
+```
+
+
+## Chi-square test: Application 
+
+\blue{Test statistic}
+
+$X^2 = \sum_{i=1}^K \frac{(O_i-E_i)^2}{E_i} = \frac{(33-29.1)^2}{29.1} + \frac{(14-17.9)^2}{17.9} + \frac{(29-32.9)^2}{32.9} + \frac{(24-20.1)^2}{20.1} = 2.59$
+
+\blue{Degrees of freedom}
+
+$df = (number \ of \ rows - 1) * (number \ of \ columns - 1) = (2-1) * (2-1) = 1$
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+
+## Chi-square test: Application 
+
+\blue{Critical values}
+
+Using ```R``` we get the critical value from the $\chi^2$-distribution:\newline
+critical value$_{\alpha}$ = critical value$_{0.05}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qchisq(p = 0.05, df = 1, lower.tail = FALSE)
+```
+
+
+## Chi-square test: Application 
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $X^2$ > critical value$_{\alpha}$
+
+We have 2.59 < 3.84 $\Rightarrow$ we do not reject the $H_0$
+\newline\newline
+Using ```R``` we obtain the p-value from the $\chi^2$-distribution:
+
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+pchisq(q = 2.59, df = 1, lower.tail = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Fisher's Exact Test: Theory
+
+\begin{itemize}
+\item Fisher’s exact test is an exact test -  but has type I error rates less than the specified value (because it is based on a discrete test statistic )
+\item Fisher’s exact test is a special case of \textbf{\textcolor{EMC60}{permutation}} tests
+
+\begin{tcolorbox}[colback=EMC60,
+                  colframe=EMC60,
+                  width=13cm
+                 ]
+
+\begin{itemize}
+{\color{white} 
+\item Calculate the original test statistic
+\item Shuffle (permute) the data and calculate the test statistic
+\item Repeat the above step for every possible permutation of the sample
+\item Calculate the fraction of the values of the test statistic that are as extreme or more to the original test statistic
+}
+\end{itemize} 
+
+\end{tcolorbox}
+
+\end{itemize}
+ 
+ 
+## Fisher's Exact Test: Theory   
+
+\blue{Assumptions}
+
+- The study groups must be independent
+- The variables should be dichotomous
+- Both row and column marginal totals are fixed in advance
+
+
+## Fisher's Exact Test: Theory
+
+\blue{Scenario} 
+
+Is there a relationship between gender and whether or not someone followed an online course? 
+
+
+## Fisher's Exact Test: Theory
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(2021)
+x1 <- sample(0:1, 100, replace = TRUE)
+x2 <- sample(0:1, 100, replace = TRUE)
+
+tab <- table(x1, x2)
+
+tab <- matrix(c("O11", "O12", "TotalR1", "O21", "O22", "TotalR2", "TotalC1", "TotalC2", "Total"), 3, 3, byrow = TRUE)
+
+colnames(tab) <- c("Yes: online course", "No: online course", "Total")
+rownames(tab) <- c("Male", "Female", "Total")
+
+library(knitr)
+kable(tab)
+```
+
+- The test assumes that both the row and column totals (TotalR1, TotalR2, TotalC1 and TotalC2) are known
+- It calculates the probability that we would have obtained the observed frequencies that we did (O11, O12, O21 and O22) given those totals
+
+
+## Fisher's Exact Test: Theory
+
+If we assume the marginal totals as given, the value of $O11$ determines the other cells. Assuming fixed marginals, the distribution of the four cell counts follows the hypergeometric distribution, e.g for $O11$:
+
+$Pr(O11)=\frac{( {TotalR1 \atop O11} )  ( {TotalR2 \atop O21} )}{( {Total \atop TotalC1} )} = \frac{\frac{TotalR1!}{O11!O12!} \frac{TotalR2!}{O21!O22!}   }{\frac{N!}{TotalC1!TotalC2!}}=  \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!}$,
+
+
+  - $({TotalR1 \atop O11}) = \frac{TotalR1!}{O11!(TotalR1-O11)!}$ 
+
+  - $!$ denotes the factorial, e.g: $N! = N (N-1) (N-2) (N-3) ... 1$
+
+
+## Fisher's Exact Test: Theory
+
+\blue{Steps}
+
+- For all possible tables (given that TotalR1, TotalR2, TotalC1 and TotalC2 are fixed), calculate the relevant hypergeometric probability
+- The p-value is the sum of hypergeometric probabilities for outcomes at least as favorable to the alternative hypothesis as the observed outcome 
+
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+
+
+
+
+
+
+
+## Fisher's Exact Test: Application
+
+\blue{Scenario} 
+
+Is there a relationship between gender and whether or not someone followed an online course? 
+
+\blue{Collect and visualize data}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(1, 3, 3, 1)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+kable(addmargins(tab))
+```
+
+For this table:\
+
+$p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!1!3!1!3!} = 0.2285714$
+
+
+## Fisher's Exact Test: Application
+
+Other alternatives:
+
+\begincols
+  \begincol{0.5\textwidth}
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(0, 4, 4, 0)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em")
+```
+
+\tiny $p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!0!4!0!4!} = 0.01428571$
+
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(2, 2, 2, 2)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em")
+```
+
+$p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!2!2!2!2!} = 0.5142857$
+
+
+\endcol
+\begincol{0.5\linewidth}
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(3, 1, 1, 3)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em")
+```
+
+\tiny $p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!3!1!3!1!} = 0.2285714$
+
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(4, 0, 0, 4)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em")
+```
+
+$p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!4!0!4!0!} = 0.01428571$
+
+ \endcol
+\endcols
+
+
+## Fisher's Exact Test: Application
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=14cm
+                 ]
+{\color{white} 
+\footnotesize For \textbf{one-tailed}: find extreme cases from the same direction as our data: $0.2285714 + 0.01428571 = 0.243$
+
+\vspace*{1cm}
+
+\begincols
+  \begincol{0.5\textwidth}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(1, 3, 3, 1)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em") %>%
+  add_footnote(c("Original data"), notation = "none")
+```
+
+\tiny $p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!1!3!1!3!} = 0.2285714$
+
+\endcol
+\begincol{0.5\linewidth}
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(0, 4, 4, 0)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em") %>%
+  add_footnote(c("Shuffle"), notation = "none")
+```
+
+\tiny $p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!0!4!0!4!} = 0.01428571$
+
+ \endcol
+\endcols
+
+}
+
+\end{tcolorbox}
+
+
+## Fisher's Exact Test: Application
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=14cm,
+                  height=7.7cm
+                 ]
+{\color{white} 
+
+\footnotesize For \textbf{one-tailed}: find extreme cases from the other direction as our data: $0.2285714 + 0.5142857 + 0.2285714 + 0.01428571 = 0.986$
+
+\begincols
+  \begincol{0.5\textwidth}
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(1, 3, 3, 1)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em") %>%
+  add_footnote(c("Original data"), notation = "none")
+```
+
+\tiny $p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!1!3!1!3!} = 0.2285714$
+
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(2, 2, 2, 2)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em") %>%
+  add_footnote(c("Shuffle"), notation = "none")
+```
+
+$p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!2!2!2!2!} = 0.5142857$
+
+
+\endcol
+\begincol{0.5\linewidth}
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(3, 1, 1, 3)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em") %>%
+  add_footnote(c("Shuffle"), notation = "none")
+```
+
+\tiny $p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!3!1!3!1!} = 0.2285714$
+
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(4, 0, 0, 4)
+
+tab <-matrix(x, 2, 2, byrow = FALSE)
+
+colnames(tab) <- c("Yes: online course", "No: online course")
+rownames(tab) <- c("Male", "Female")
+
+library(knitr)
+library(kableExtra)
+kable(addmargins(tab))  %>%
+  kable_styling(font_size = 7) %>%
+  column_spec(1:4, width = "4em") %>%
+  add_footnote(c("Shuffle"), notation = "none")
+```
+
+$p = \frac{TotalR1!TotalR2!TotalC1!TotalC2!}{Total!O11!O12!O21!O22!} = \frac{4!4!4!4!}{8!4!0!4!0!} = 0.01428571$
+
+ \endcol
+\endcols
+
+
+}
+
+\end{tcolorbox}
+
+
+## Fisher's Exact Test: Application
+
+- For a \textbf{\textcolor{EMCdark}{two-tailed}} test we must also consider tables that are equally extreme in both direction
+- This is challenging, therefore we sum the probabilities that are equal or less than that from the observed data:
+$0.2285714 + 0.01428571 + 0.2285714 + 0.01428571 = 0.486$
+
+
+\blue{Draw conclusions}
+
+If $\alpha = 0.05$ $\Rightarrow$ we do not reject the $H_0$ since p-value is > $0.05$
+
+
+## Further reading
+
+- Campbell I. Chi‐squared and Fisher–Irwin tests of two‐by‐two tables with small sample recommendations. Statistics in medicine. 2007 Aug 30;26(19):3661-75.
+- Crans GG, Shuster JJ. How conservative is Fisher's exact test? A quantitative evaluation of the two‐sample comparative binomial trial. Statistics in medicine. 2008 Aug 15;27(18):3598-611.
+- Lydersen S, Fagerland MW, Laake P. Recommended tests for association in 2× 2 tables. Statistics in medicine. 2009 Mar 30;28(7):1159-75.

@@ -1,0 +1,1128 @@
+---
+title: 'Statistical Tests for Continuous Data'
+output: 
+  html_document:
+    code_folding: show
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: false
+    theme: spacelab
+    highlight: tango
+    includes:
+      after_body: ../footerEA.html
+    css: ../style.css
+---
+
+
+```{r setup, include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+
+```{r, echo = FALSE, purl = FALSE}
+knitr::knit_hooks$set(purl = knitr::hook_purl)
+
+options(purl = FALSE)
+
+knitr::opts_chunk$set(purl = FALSE)
+```
+
+```{r, include = FALSE}
+knitr::opts_hooks$set(eval = function(opt) {
+  if (any(opt$exercise))
+    opt$eval <- opt$include <- FALSE
+  
+  opt
+})
+
+
+static <- TRUE
+
+options(width = 100)
+
+```
+
+
+```{r packages, include = FALSE}
+library(kableExtra)
+library(knitr)
+```
+
+
+```{r load_data, context="data", include=FALSE}
+library(survival)
+```
+
+
+## Preface {data-progressive=FALSE}
+
+Open Rstudio to do the practicals. Note that tasks with * are optional.
+
+_`r R.version.string`_
+
+### One sample tests {.tabset .tabset-fade .tabset-pills}
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `ToothGrowth`. 
+
+* Investigate with plots the tooth length.
+* We would like to test whether the mean tooth length is different from 20. Define the null and alternative hypothesis.
+* Perform the test and save the result in an object called test_res. What is the conclusion?
+* Extract the test statistic.
+* Calculate the test statistic manually and confirm the results with the R function.
+* Calculate the confidence interval manually and confirm the results with the R function.
+* Calculate the p-value manually and confirm the results with the R function.
+* Provide the definition of the p-value.
+* Obtain the same results using a linear regression model.
+
+```{r onesample1_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1">Hint</button>
+<div id = "onesample1" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R functions hist(...) / boxplot(...) to visually explore the distribution of a numeric vector. 
+</div>')
+```
+
+
+```{r onesample1a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1a">Hint</button>
+<div id = "onesample1a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Since the data looks normally distributed and we have 60 subjects, we can use the t-test. Use the R function t.test() to investigate whether the mean sample is different from a particular value.
+</div>')
+```
+
+```{r onesample1b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1b">Hint</button>
+<div id = "onesample1b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#0c2074">
+To extract a particular result from an object use the $ symbol.
+</div>')
+```
+
+```{r onesample1e_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1e">Hint</button>
+<div id = "onesample1e" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+The one-sample t-test is a special case of the regression model. Keep in mind that the p-value of a linear regression model with only the intercept investigates whether the coefficient is equal to 0. Here we want to investigate whether the mean is 20.
+</div>')
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r onesample1-solution, solution = TRUE}
+head(ToothGrowth)
+hist(ToothGrowth$len)
+boxplot(ToothGrowth$len)
+```
+
+Null hypothesis: The mean tooth length is equal to 20.\
+Alternative hypothesis: The mean tooth length is different from 20.
+
+```{r onesample1-solutiona, solution = TRUE}
+test_res <- t.test(x = ToothGrowth$len, mu = 20)
+test_res
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we cannot reject the null hypothesis that the sample mean length is 20.
+
+```{r onesample1-solutionb, solution = TRUE}
+test_res$statistic
+```
+
+The test statistic of a one-sample t-test is $\frac{\bar{x} - \mu_0}{sd(x)/\sqrt{n}}$
+
+```{r onesample1-solutionc, solution = TRUE}
+# Calculate the test statistic manually
+test_statistic <- (mean(ToothGrowth$len) - 20)/(sd(ToothGrowth$len)/sqrt(length(ToothGrowth$len)))
+test_statistic
+```
+
+The confidence interval is:
+
+[$\bar{x} - critical \ value_{\alpha/2} \frac{sd(x)}{\sqrt{n}}$, $\bar{x} + critical \ value_{\alpha/2} \frac{sd(x)}{\sqrt{n}}$]
+
+
+The sampling distribution of the mean is assumed to follow the Student’s t-distribution. We will use this distribution to obtain the critical values and the p-value.
+
+
+```{r onesample1-solutiond, solution = TRUE}
+# Calculate the confidence interval manually
+# lower limit:
+mean(ToothGrowth$len) + qt(0.025, df = length(ToothGrowth$len) - 1) * (sd(ToothGrowth$len)/sqrt(length(ToothGrowth$len)))
+# or 
+mean(ToothGrowth$len) - qt(0.025, df = length(ToothGrowth$len) - 1, lower.tail = FALSE) * (sd(ToothGrowth$len)/sqrt(length(ToothGrowth$len)))
+
+# upper limit:
+mean(ToothGrowth$len) + qt(0.025, df = length(ToothGrowth$len) - 1, lower.tail = FALSE) * (sd(ToothGrowth$len)/sqrt(length(ToothGrowth$len)))
+
+```
+
+
+```{r onesample1-solutione, solution = TRUE}
+# Calculate the p-value manually
+p_value = 2 * pt(test_statistic, df = length(ToothGrowth$len) - 1)
+p_value
+
+```
+
+Definition of p-value: If the null hypothesis is true, then there is a 24% chance of obtaining a difference at least as extreme as the results observed between the sample mean and 20.
+
+The one-sample t-test is a special case of the regression model. Keep in mind that the p-value of a linear regression model with only the intercept investigates whether the coefficient is equal to 0. Here we want to investigate whether the mean is equal to 20. Therefore, we assume our new outcome to be $y-20$.
+
+```{r onesample1-solutionf, solution = TRUE}
+# Subtract the value 20:
+y <-  ToothGrowth$len - 20
+
+# Fit the linear regression model with only intercept:
+summary(lm(y ~ 1))
+```
+
+The p-value is 0.234, the df is 59 and the t-value is -1.202. These results were also observed in the t-test:
+```{r onesample1-solutiong, solution = TRUE}
+t.test(x = ToothGrowth$len, mu = 20)
+```
+
+The coefficient in the linear regression model can be obtained as the mean sample - 20 (18.81333 - 20 = -1.18667).
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `ToothGrowth`. 
+
+
+* We want to investigate whether the median tooth length of the supplement type VC is different from 20. Define the null and alternative hypothesis.
+* Perform the test and save the results in an object called test_res_b. What is the conclusion?
+* Calculate the test statistic manually.
+
+
+```{r onesample2b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample2b">Hint</button>
+<div id = "onesample2b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function wilcox.test() to investigate whether the median sample is different from a particular value. It is recommended to use the exact p-value calculation when there are no ties, and to use continuity correction if an exact calculation is not possble.
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2\\n")
+```
+
+
+Null hypothesis: The median tooth length of the supplement type VC is equal to 20.\
+Alternative hypothesis: The median tooth length of the supplement type VC is different from 20.
+
+
+```{r onesample2-solution, solution = TRUE}
+test_res_b <- wilcox.test(x = ToothGrowth$len[ToothGrowth$supp == "VC"], 
+            mu = 20, exact = FALSE)
+
+test_res_b
+# Because there are ties in the data, the exact calculation of the p-value could not be used and the normal approximation was used instead. Continuity correction was assumed (by default).
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we cannot reject the null hypothesis that the sample median length of the VC group is 20. Keep in mind that the p-value is very close to the significant level.
+
+\
+The test statistic is either the sum of the ranks (of the absolute difference) where the difference was positive or
+negative:
+
+```{r onesample2-solutionb, solution = TRUE}
+# Calculate the test statistic manually
+x <- ToothGrowth$len[ToothGrowth$supp == "VC"]
+y <- 20
+
+# Calculate the rank of the absolute differece:
+res <- rank(abs(x - y))
+
+# Calculate the sum of the ranks where the difference was positive:
+sum(res[(x - y) > 0])
+
+# Calculate the sum of the ranks where the difference was negative:
+sum(res[(x - y) < 0])
+
+# which is equal to:
+test_res_b$statistic
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 3*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `ToothGrowth`. 
+
+* We want to investigate whether the median tooth length of dose equal to 2 is larger than 20. Define the null and alternative hypothesis. What is the conclusion?
+* Calculate the test statistic manually and compare it with the test statistic from the R function.
+
+
+```{r onesample3_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample3">Hint</button>
+<div id = "onesample3" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+This is a one-tailed test.
+</div>')
+```
+
+
+```{r onesample3a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample3a">Hint</button>
+<div id = "onesample3a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function wilcox.test() to investigate whether the median sample is different from a particular value. It is recommended to use the exact p-value calculation when there are no ties, and to use continuity correction if an exact calculation is not possble.
+</div>')
+```
+
+
+```{r onesample3b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample3b">Hint</button>
+<div id = "onesample3b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+In the R function wilcox.test() check the argument alternative.
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 3*\\n")
+```
+
+Null hypothesis: The the median tooth length of dose equal to 2 is equal to 20.\
+Alternative hypothesis: The the median tooth length of dose equal to 2 is larger than 20.
+
+
+```{r onesample3-solution, solution = TRUE}
+wilcox.test(x = ToothGrowth$len[ToothGrowth$dose == "2"], 
+            mu = 20, exact = FALSE, alternative = c("greater"))
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we can reject the null hypothesis that the sample median length of dose equal to 2 is 20 (or less). 
+
+```{r onesample3-solutiona, solution = TRUE}
+# Calculate the test statistic manually
+x <- ToothGrowth$len[ToothGrowth$dose == "2"]
+mu <- 20
+
+# Calculate the rank of the absolute difference:
+res <- rank(abs(x - mu))
+
+# Calculate the sum of the ranks where the difference was positive:
+sum(res[(x - mu) > 0])
+
+# Calculate the sum of the ranks where the difference was negative:
+sum(res[(x - mu) < 0])
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Two sample tests {.tabset .tabset-fade .tabset-pills}
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`. 
+
+* Investigate with plots the `Sepal.Length` per species.
+* We would like to investigate whether the mean sepal length is different between setosa and versicolor. Define the null and alternative hypothesis.
+* Perform the test and save the result in an object called test_res2. What is the conclusion?
+* Extract the test statistic.
+* Calculate the test statistic and the p-value manually.
+* Calculate the confidence interval manually and confirm the results with the R function.
+
+```{r twosample1_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample1">Hint</button>
+<div id = "twosample1" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R functions boxplot(...) / hist(...) to visually explore the distribution of a numeric vector per group. 
+</div>')
+```
+
+```{r twosample1a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample1a">Hint</button>
+<div id = "twosample1a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Since the data looks normally distributed and we have 50 subjects, we can use the t-test. Use the R function t.test() to investigate whether the mean values of two sample groups are different.
+</div>')
+```
+
+```{r twosample1b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample1b">Hint</button>
+<div id = "twosample1b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Note that the samples are independent.</div>')
+```
+
+```{r twosample1c_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample1c">Hint</button>
+<div id = "twosample1c" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+To extract a particular result from an object use the $ symbol.
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r twosample1-solution, solution = TRUE}
+head(iris)
+boxplot(iris$Sepal.Length ~ iris$Species)
+
+par(mfrow = c(1, 3))
+hist(iris$Sepal.Length[iris$Species == "setosa"], 
+     main = "setosa", xlab = "Length")
+hist(iris$Sepal.Length[iris$Species == "versicolor"], 
+     main = "versicolor", xlab = "Length")
+hist(iris$Sepal.Length[iris$Species == "virginica"], 
+     main = "virginica", xlab = "Length")
+```
+
+Null hypothesis: The mean sepal length is equal for setosa and versicolor.\
+Alternative hypothesis: The mean sepal length is different for setosa and versicolor.
+
+```{r twosample1-solutionb, solution = TRUE}
+test_res2 <- t.test(x = iris$Sepal.Length[iris$Species == "setosa"], 
+                    y = iris$Sepal.Length[iris$Species == "versicolor"])
+
+test_res2
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we can reject the null hypothesis that the sample mean values of the (sepal) length for setosa and versicolor are the same.
+
+
+Let's calculate everything also manually.
+
+We first test the homogeneity of the variances:
+
+$F$ statistic: $\frac{highest \ variance}{lowest \ variance}$.\
+Moreover, the degrees of freedom are: $n_1 - 1$ and $n_2 - 1.$
+
+```{r twosample1-solutionc, solution = TRUE}
+# Calculate the test statistic manually
+x <- iris$Sepal.Length[iris$Species == "setosa"]
+y <- iris$Sepal.Length[iris$Species == "versicolor"]
+
+# Test whether the variances are equal
+# Test statistic:
+F_statistic = var(y)/var(x)
+# P-value:
+pf(F_statistic, df1 = length(x) - 1, df2 = length(y) - 1, lower.tail = FALSE)
+# We reject the hypothesis that the variances are equal.
+```
+
+The test statistic is:
+$t = \frac{(\bar{x}_1 - \bar{x}_2) - (\mu_1 - \mu_2)}{\sqrt{\frac{sd^2(x_1)}{n_1} + \frac{sd^2(x_2)}{n_2}}}$,\
+where\
+
+- Sample mean of group 1, 2: $\bar{x}_1$, $\bar{x}_2$
+- Standard deviation of group 1, 2: $sd(x_1)$, $sd(x_2)$
+- Number of subjects in group 1, 2: $n_1$, $n_2$
+
+$\mu_1$ and $\mu_2$ are 0 since we want to investigate whether the difference is 0.
+
+The degrees of freedom are:
+$df = \frac{\bigg[\frac{sd^2(x_1)}{n_1} + \frac{sd^2(x_2)}{n_2} \bigg]^2}{ \frac{[sd^2(x_1)/n_1]^2}{n_1 - 1} + \frac{[sd^2(x_2)/n_2]^2}{n_2 - 1} }$
+
+
+```{r twosample1b-solutionc, solution = TRUE}
+# Test statistic:
+Test_statistic <- (mean(x) - mean(y))/sqrt(var(x)/length(x) + var(y)/length(y))
+Test_statistic
+# Degrees of freedom:
+degrees_fr <- (var(x)/length(x) + var(y)/length(y))^2/( (var(x)/length(x))^2/(length(x) - 1) + (var(y)/length(y))^2/(length(y) - 1) )
+# P-value:
+2 * pt(Test_statistic, df = degrees_fr, lower.tail = TRUE)
+
+test_res2$statistic
+test_res2$p.value
+```
+
+
+The confidence interval is:
+
+$\bigg[(\bar{x}_1-\bar{x}_2) - critical \ value_{\alpha/2} \sqrt{\frac{sd^2(x_1)}{n_1} + \frac{sd^2(x_2)}{n_2}}$, $(\bar{x}_1-\bar{x}_2) + critical \ value_{\alpha/2} \sqrt{\frac{sd^2(x_1)}{n_1} + \frac{sd^2(x_2)}{n_2}}\bigg]$
+
+
+The sampling distribution of the mean is assumed to follow the Student’s t-distribution. We will use this distribution to obtain the critical values.
+
+```{r twosample1-solutiond, solution = TRUE}
+# Calculate the confidence interval manually
+# lower limit:
+(mean(x) - mean(y)) + qt(0.025, df = degrees_fr) * sqrt(var(x)/length(x) + var(y)/length(y))
+# or
+(mean(x) - mean(y)) - qt(0.025, df = degrees_fr, lower.tail = FALSE) * sqrt(var(x)/length(x) + var(y)/length(y))
+
+# upper limit:
+(mean(x) - mean(y)) + qt(0.025, df = degrees_fr, lower.tail = FALSE) * sqrt(var(x)/length(x) + var(y)/length(y))
+```
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`. 
+
+* Investigate with plots the `Petal.Width` per species.
+* We want to investigate whether the petal width values are different between setosa and versicolor. Define the null and alternative hypothesis.
+* Perform the test and save the result in an object called test_res2b. What is the conclusion?
+* Extract the test statistic and p-value. 
+
+
+
+```{r twosample2_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample2">Hint</button>
+<div id = "twosample2" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Note that the samples are independent.</div>')
+```
+
+
+```{r twosample2a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample2a">Hint</button>
+<div id = "twosample2a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+The distributions of the variables do not look normally distributed. Therefore, we will use the non-parametric test. Use the R function wilcox.test() to investigate whether the two populations have the same distribution. It is recommended to use the exact p-value calculation when there are no ties, and to use continuity correction if an exact calculation is not possble. 
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2\\n")
+```
+
+```{r twosample2-solution, solution = TRUE}
+boxplot(iris$Petal.Width ~ iris$Species)
+
+par(mfrow = c(1, 2))
+par(mfrow = c(1, 3))
+hist(iris$Petal.Width[iris$Species == "setosa"], 
+     main = "setosa", xlab = "Width")
+hist(iris$Petal.Width[iris$Species == "versicolor"], 
+     main = "versicolor", xlab = "Width")
+hist(iris$Petal.Width[iris$Species == "virginica"], 
+     main = "virginica", xlab = "Width")
+```
+
+Null hypothesis: The distributions of petal width are equal for setosa and versicolor.\
+Null hypothesis: The distributions of petal width are different for setosa and versicolor.
+
+The distributions of width (petal) for setosa and versicolor do not look normally distributed. We will, therefore, use the non-parametric test.
+
+```{r twosample2-solutionb, solution = TRUE}
+test_res2b <- wilcox.test(x = iris$Petal.Width[iris$Species == "setosa"], 
+                          y = iris$Petal.Width[iris$Species == "versicolor"],
+                          exact = FALSE)
+test_res2b
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we can reject the null hypothesis that the distributions of the (petal) width for setosa and versicolor are the same.
+
+```{r twosample2-solutionc, solution = TRUE}
+test_res2b$statistic
+test_res2b$p.value
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 3\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `airquality`. 
+
+* Investigate with plots the variable `Wind` per month group.
+* Test whether `Wind` is different between month 5 and 8. Let's assume that the measurements are paired. 
+* Obtain the test statistic manually.
+
+
+```{r twosample3_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample3">Hint</button>
+<div id = "twosample3" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Note that the samples are dependent.</div>')
+```
+
+
+```{r twosample3a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample3a">Hint</button>
+<div id = "twosample3a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+The distributions of the variables do not look normally distributed. Therefore, we will use the non-parametric test. Use the R function wilcox.test() to investigate whether the median values are different. Check the argument paired in the R function. 
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 3\\n")
+```
+
+```{r twosample3-solution, solution = TRUE}
+# First we will explore the data with plots
+head(airquality)
+boxplot(airquality$Wind ~ airquality$Month)
+
+par(mfrow = c(1, 2))
+hist(airquality$Wind[airquality$Month == "5"], 
+     main = "5 months", xlab = "Wind")
+hist(airquality$Wind[airquality$Month == "8"], 
+     main = "8 months", xlab = "Wind")
+```
+
+We notice that the distribution of the variable of interest is skewed (at least in one of the groups) and might not follow a normal distribution. Moreover, the sample size is small. We decide, therefore, to use a non-parametric test.
+
+```{r twosample3-solutionb, solution = TRUE}
+wilcox.test(x = airquality$Wind[airquality$Month == "5"], 
+            y = airquality$Wind[airquality$Month == "8"], 
+            paired = TRUE, exact = FALSE)
+
+# Alternatively:
+wilcox.test(Wind ~ Month, 
+            data = airquality[airquality$Month == "5" | airquality$Month == "8",],
+            paired = TRUE, exact = FALSE)
+wilcox.test(Wind ~ Month, data = airquality,
+            subset = Month %in% c(5, 8),
+            paired = TRUE, exact = FALSE)
+```
+
+
+If we assume that the significant level is equal to 0.05, the output indicates that we can reject the null hypothesis that the sample median wind of the month 5 is equal to the month 8.
+
+
+```{r twosample3-solutionc, solution = TRUE}
+# Calculate the test statistic manually
+x <- airquality$Wind[airquality$Month == "5"]
+y <- airquality$Wind[airquality$Month == "8"]
+
+# Create a data frame including the variables, the difference and the absolute difference:
+mat <- data.frame(x, y, diff = c(x-y), abs_diff = abs(x-y))
+
+# Remove the pairs that scored equal:
+mat <- mat[-10,]
+
+# Add the ranks of the absolute differences as an extra column:
+mat <- data.frame(mat, ranks = rank(abs(mat$x-mat$y)))
+
+# Calculate the sum of the ranks where the difference was positive:
+sum(mat$ranks[mat$diff > 0])
+
+# Calculate the sum of the ranks where the difference was negative:
+sum(mat$ranks[mat$diff < 0])
+```
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 4*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `airquality`.
+
+* We want to investigate whether month 5 has lower temperature than month 8. Let's assume that the measurements are paired. Define the null and alternative hypothesis.
+* What is the conclusion?
+
+
+```{r twosample4_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample4">Hint</button>
+<div id = "twosample4" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Note that this is a one-tailed test.</div>')
+```
+
+
+```{r twosample4a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample4a">Hint</button>
+<div id = "twosample4a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+To perform a one-sided test, the argument alternative needs to be specified to either "less" or "greater".</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 4*\\n")
+```
+
+
+
+```{r twosample4-solution, solution = TRUE}
+# First we will explore the data with plots
+boxplot(airquality$Temp ~ airquality$Month)
+```
+
+
+We notice that the distribution of the variable of interest is skewed (at least in one of the groups) and might not follow a normal distribution. Moreover, the sample size is small. We decide, therefore, to use a non-parametric test.
+
+Null hypothesis: The median temperature of month 5 is equal to the median temperature of month 8.\
+Alternative hypothesis: The median temperature of month 5 is lower than the median temperature of month 8.
+
+```{r twosample4-solutionb, solution = TRUE}
+wilcox.test(x = airquality$Temp[airquality$Month == "5"], 
+            y = airquality$Temp[airquality$Month == "8"], 
+            alternative = 'less', paired = TRUE, exact = FALSE)
+
+# Alternatively...
+# When using the formula specification, x refers to the first level or values and y refers to the second level or value.
+wilcox.test(Temp ~ Month, 
+            data = airquality[airquality$Month == "5" | airquality$Month == "8",],
+            alternative = 'less', paired = TRUE, exact = FALSE)
+```
+
+If we assume that the significant level is equal to 0.05, we can reject the null hypothesis that the sample median values of the two groups are equal.
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 5*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`.
+
+* We would like to investigate whether the mean sepal length is different between setosa and versicolor. Perform a t-test and a linear regression.
+* Compare the results of the two approaches.
+
+
+```{r twosample5_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample5">Hint</button>
+<div id = "twosample5" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Since the data looks normally distributed and we have 50 subjects, we can use the t-test. Use the R function t.test() to investigate whether the mean values of two sample groups are different.</div>')
+```
+
+
+```{r twosample5a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample5a">Hint</button>
+<div id = "twosample5a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+The two-sample t-test is a special case of the regression model. For example, if we assume a regression model including only one variable, the group indicator, we can hypothesize that the slope coefficient is equal to 0.</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 5*\\n")
+```
+
+
+```{r twosample5-solution, solution = TRUE}
+# Create a new data set where the first variable indicates the length and the second variable the group (setona or versicolor):
+var1 = iris$Sepal.Length[iris$Species == "setosa"]
+var2 = iris$Sepal.Length[iris$Species == "versicolor"]
+
+dat <- data.frame(outcome = c(var1, var2),
+                  group = c(rep(0, length(var1)),
+                            rep(1, length(var2))))
+
+# Fit a linear regression model:
+summary(lm(outcome ~ group, data = dat))
+```
+
+The p-value is <0.0001 and the t-value is 10.52. The same results can be observed from the t-test:
+```{r twosample5-solutiona, solution = TRUE}
+var1 = iris$Sepal.Length[iris$Species == "setosa"]
+var2 = iris$Sepal.Length[iris$Species == "versicolor"]
+
+t.test(var2, var1)
+```
+
+
+The slope coefficient in the linear regression model can be obtained as the mean difference (5.936 - 5.006 = 0.93).
+
+We can also investigate the confidence intervals:
+```{r twosample5-solutionb, solution = TRUE}
+# Obtain the confidence interval from the t-test:
+t.test(var2, var1)$conf.int
+# Obtain the confidence interval from the linear regression:
+confint(lm(outcome ~ group, data = dat))
+```
+
+
+
+
+### M sample tests {.tabset .tabset-fade .tabset-pills}
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `airquality`.
+
+* Investigate with plots the distribution of temperature per month group.
+* We want to investigate whether the distribution of temperature is different per month group. Define the null and alternative hypothesis.
+* What is the conclusion?
+
+
+
+```{r msample1_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#msample1">Hint</button>
+<div id = "msample1" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R functions boxplot(...) / hist(...) to visually explore the distribution of a numeric vector per group. 
+</div>')
+```
+
+
+```{r msample1a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#msample1a">Hint</button>
+<div id = "msample1a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+We do not seem to have normally distributed data. Moreover, the sample size is small. Therefore, we can use the non-parametric test Kruskal-Wallis. Use the R function kruskal.test() to investigate whether the samples originate from the same distribution.
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r msample1-solution, solution = TRUE}
+# First we will explore the data with plots
+boxplot(airquality$Temp ~ airquality$Month)
+
+par(mfrow = c(2, 3))
+hist(airquality$Temp[airquality$Month == "5"], 
+     main = "Month 5", xlab = "Length")
+hist(airquality$Temp[airquality$Month == "6"], 
+     main = "Month 6", xlab = "Length")
+hist(airquality$Temp[airquality$Month == "7"], 
+     main = "Month 7", xlab = "Length")
+hist(airquality$Temp[airquality$Month == "8"], 
+     main = "Month 8", xlab = "Length")
+hist(airquality$Temp[airquality$Month == "9"], 
+     main = "Month 9", xlab = "Length")
+```
+
+We notice that the distribution of the variable of interest is skewed (at least in one of the groups) and might not follow a normal distribution. Moreover, the sample size is small. We decide, therefore, to use a non-parametric test.
+
+Null hypothesis: the distribution of temperature is similar per month group.\
+Alternative hypothesis: the distribution of temperature is different per month group.
+
+```{r msample1-solutionb, solution = TRUE}
+kruskal.test(Temp ~ Month, data = airquality)
+```
+
+The output shows that, if the significant level is 0.05, we can reject the null hypothesis that the groups have similar distributions.
+
+
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+* Simulate 3 numeric vectors of length 80 with the following details:
+   * variable 1: from the normal distribution with mean 20 and standard deviation 10
+   * variable 2: from the normal distribution with mean 40 and standard deviation 6
+   * variable 3: from the normal distribution with mean 15 and standard deviation 20
+* Investigate whether the distributions of the above created variables are different.
+
+
+
+```{r msample1b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#msample1b">Hint</button>
+<div id = "msample1b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+We have normally distributed data and a large sample size. Use the R function aov() to investigate whether the samples originate from the same distribution.
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2\\n")
+```
+
+```{r msample2-solution, solution = TRUE}
+# Generate data
+set.seed(123)
+
+BMI1 <- rnorm(80, 20, 10)
+BMI2 <- rnorm(80, 40, 6)
+BMI3 <- rnorm(80, 15, 20)
+
+# First we will explore the data with plots
+boxplot(BMI1, BMI2, BMI3)
+
+par(mfrow = c(1, 3))
+hist(BMI1)
+hist(BMI2)
+hist(BMI3)
+```
+
+The distributions are normal and the sample size is large. We decide, therefore, to use an ANOVA test.
+
+```{r msample2-solutionb, solution = TRUE}
+BMI <- c(BMI1, BMI2, BMI3)
+group <- c(rep(1, 80), rep(2, 80), rep(3, 80))
+summary(aov(BMI ~ as.factor(group)))
+```
+
+The output shows that, if the significant level is 0.05, we can reject the null hypothesis that the sample mean values of the groups are equal.
+
+
+
+
+
+
+
+
+
+### Correlation tests {.tabset .tabset-fade .tabset-pills}
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`. 
+
+* Investigate with plots the association between `Sepal.Length` and `Sepal.Width`.
+* Obtain the Pearson correlation coefficient for the association of `Sepal.Length` and `Sepal.Width`.
+* Perform the Pearson correlation test for the variables `Sepal.Length` and `Sepal.Width`.
+
+```{r corr1a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#corr1a">Hint</button>
+<div id = "corr1a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function plot(...) to create a scatterplot. 
+</div>')
+```
+
+
+```{r corr1b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#corr1b">Hint</button>
+<div id = "corr1b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function cor(...) to obtain the correlation coefficient. 
+</div>')
+```
+
+```{r corr1c_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#corr1c">Hint</button>
+<div id = "corr1c" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function cor.test(...) to perform the correlation test. 
+</div>')
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r corr1-solution, solution = TRUE}
+plot(x = iris$Sepal.Length, y = iris$Sepal.Width)
+
+cor(x = iris$Sepal.Length, y = iris$Sepal.Width)
+
+cor.test(x = iris$Sepal.Length, y = iris$Sepal.Width)
+```
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`. 
+
+* Investigate with plots the association between `Sepal.Length` and `Sepal.Width` in the setosa group.
+* Obtain the Spearman correlation coefficient for the association of `Sepal.Length` and `Sepal.Width` in the setosa group.
+* Perform the Spearman correlation test for the variables `Sepal.Length` and `Sepal.Width` in the setosa group.
+
+
+
+```{r corr2b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#corr2b">Hint</button>
+<div id = "corr2b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function cor(...) to obtain the correlation coefficient. Check the argument method.
+</div>')
+```
+
+```{r corr2c_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#corr2c">Hint</button>
+<div id = "corr2c" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function cor.test(...) to perform the correlation test. Check the argument method.
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2*\\n")
+```
+
+```{r corr2-solution, solution = TRUE}
+# Create new vectors with the desired variables
+var1 <- iris$Sepal.Length[iris$Species == "setosa"]
+var2 <- iris$Sepal.Width[iris$Species == "setosa"]
+
+plot(x = var1, y = var2)
+
+cor(x = var1, y = var2)
+
+cor.test(x = var1, y = var2, method = "spearman")
+```
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 3*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`. 
+
+* Perform the Pearson correlation test for the variables `Sepal.Length` and `Sepal.Width`.
+* Perform a linear regression assuming the standardized values of `Sepal.Length` and `Sepal.Width`.
+* Compare the slope estimate of the linear regression and the correlation coefficient.
+* Compare the p-value of the slope estimate of the linear regression with the p-value of the correlation test.
+
+
+
+```{r corr3a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#corr3a">Hint</button>
+<div id = "corr3a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function cor.test(...) to perform the correlation test. 
+</div>')
+```
+
+
+
+```{r corr3b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#corr3b">Hint</button>
+<div id = "corr3b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function lm(...) to perform a linear regression. 
+</div>')
+```
+
+
+```{r corr3c_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#corr3c">Hint</button>
+<div id = "corr3c" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+The slope of the linear regression becomes the correlation coefficient if the two variables have identical standard deviations (they are standardized).
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 3*\\n")
+```
+
+```{r corr3-solution, solution = TRUE}
+# Pearson correlation test
+cor.test(x = iris$Sepal.Length, y = iris$Sepal.Width)
+
+# Linear regression
+# We standardize the variables:
+y1 <- (iris$Sepal.Length - mean(iris$Sepal.Length))/sd(iris$Sepal.Length)
+y2 <- (iris$Sepal.Width - mean(iris$Sepal.Width))/sd(iris$Sepal.Width) 
+
+# We fit a linear regression model:
+summary(lm(y1 ~ y2))
+
+# Alternatively
+summary(lm(scale(iris$Sepal.Length) ~ scale(iris$Sepal.Width)))
+```
+
+The correlation coefficient and the slope coefficient are both -0.118.\
+The p-value from the correlation test and the slope coefficient are both 0.152.

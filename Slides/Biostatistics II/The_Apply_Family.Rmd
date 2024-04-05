@@ -1,0 +1,315 @@
+---
+title: "Biostatistics II: Introduction to R"
+subtitle: "The apply family"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation:
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment = NA)
+
+library(survival)
+```
+
+
+## In this Section
+
+* The apply family
+
+* A lot of practice
+
+
+##  What is the apply Family
+
+Manipulate \blue{vectors} or slices of data from \blue{matrices}, \blue{arrays}, \blue{data frames} and \blue{lists} in a repetitive way 
+
+\vspace*{0.7cm}
+
+  - An aggregating function, like for example the mean, or the sum
+  - Other transforming or subsetting functions
+  - Other vectorized functions, which return more complex structures like lists, vectors and matrices
+  
+  
+## What is the apply Family  
+
+\blue{apply(), lapply() , sapply(), tapply(), mapply()}
+
+\vspace*{3ex} 
+
+\textbf{But how and when should we use these?}
+
+
+## How To Use apply() in R
+
+* Operates on \blue{\texttt{matrices}}, \blue{\texttt{arrays}} and \blue{\texttt{data frames}}
+
+\begincols[t, onlytextwidth]
+\begincol{0.57\linewidth}
+* By column
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mat <- matrix(1:4, nrow = 2, ncol = 2)
+mat
+apply(mat, 2, sum)
+```
+
+
+\endcol
+\begincol{0.37\linewidth}
+* By row
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+apply(mat, 1, sum)
+```
+
+\endcol
+\endcols
+
+
+## How To Use apply() in R  
+
+* Operates on \blue{\texttt{matrices}}, \blue{\texttt{arrays}} and \blue{\texttt{data frames}}
+
+\begincols[t, onlytextwidth]
+\begincol{0.57\linewidth}
+* By column
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mat <- matrix(1:4, nrow = 2, ncol = 2)
+mat
+apply(mat, 2, mean)
+```
+
+\endcol
+\begincol{0.37\linewidth}
+* By row
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+apply(mat, 1, mean)
+```
+
+\endcol
+\endcols
+
+
+## How To Use apply() in R  
+
+* You can also apply your own functions
+
+
+* By column
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mat <- matrix(1:4, nrow = 2, ncol = 2)
+mat
+apply(mat, 2, function(x) { sum(x)/(length(x)-1) } )
+```
+
+
+
+
+## How To Use lapply() in R 
+
+* Apply a given function to every element of a \blue{\texttt{list}} and return a \blue{\texttt{list}}
+
+\vspace*{0.6cm}
+
+* The difference with \blue{\texttt{apply()}}:
+  - It can be used for other objects like \blue{\texttt{vector}}, \blue{\texttt{data.frame}} or \blue{\texttt{list}}
+  - The output returned is a list
+
+
+## How To Use lapply() in R  
+
+\begincols[t, onlytextwidth]
+\begincol{0.47\linewidth}
+
+\vspace*{-0.7cm}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+myList <- list(x = c(1:6), 
+               y = c("m", "f"), 
+               z = c(30, 4, 23))
+myList
+```
+
+\endcol
+\begincol{0.47\linewidth}
+
+\vspace*{-0.5cm}
+
+* Use pre-specified functions
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+lapply(myList, length)
+```
+
+\endcol
+\endcols
+
+
+## How To Use lapply() in R  
+
+\begincols[t, onlytextwidth]
+\begincol{0.47\linewidth}
+
+\vspace*{-0.4cm}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+myList <- list(x = c(1:6), 
+               y = c("m", "f"), 
+               z = c(30, 4, 23))
+myList
+```
+
+
+\endcol
+\begincol{0.47\linewidth}
+
+
+* Use pre-specified functions
+
+\vspace*{-0.4cm}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE, warning = FALSE}
+lapply(myList, median)
+```
+
+\vspace*{0.2cm}
+* You can also apply your own functions!
+
+\endcol
+\endcols
+
+
+## How To Use sapply() in R 
+
+* \blue{\texttt{sapply()}} is similar to \blue{\texttt{lapply()}}, but it tries to simplify the output
+
+\begincols[t, onlytextwidth]
+\begincol{0.47\linewidth}
+
+\vspace*{-0.4cm}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+myList <- list(x = c(1:6), 
+               y = c("m", "f"), 
+               z = c(30, 4, 23))
+myList
+```
+
+
+
+\endcol
+\begincol{0.47\linewidth}
+
+
+
+* Use pre-specified functions
+
+\vspace*{-0.4cm}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE, warning = FALSE}
+sapply(myList, length)
+sapply(myList, median)
+```
+
+\vspace*{0.2cm}
+
+* You can also apply your own functions!
+
+\endcol
+\endcols
+
+
+## How To Use tapply() in R
+
+* Apply a function to subsets of a \blue{\texttt{vector}} - the subsets are defined by some other \blue{\texttt{vector}}, usually a factor
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+tapply(pbc$bili, pbc$sex, mean)
+tapply(pbc$age, pbc$sex, median)
+```
+
+
+## How To Use tapply() in R  
+
+* You can also apply your own functions
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+tapply(pbc$bili, pbc$sex, function(x) { sum(x)/(length(x)-1) } )
+```
+
+
+## How To Use mapply() in R
+
+* Multivariate apply
+* Its purpose is to be able to vectorize arguments to a function that is not usually accepting \blue{\texttt{vectors}} as arguments
+* \blue{\texttt{mapply()}} applies a function to multiple \blue{\texttt{list}} or multiple \blue{\texttt{vector}} arguments
+
+\vspace*{2ex}
+```{r, echo = FALSE}
+options(width = 70)
+```
+```{r, eval = FALSE, echo = TRUE}
+mapply(length, pbc)
+```
+\vspace*{-2ex}
+```{r, eval = TRUE, echo = FALSE}
+# this is necessary to adjust the spacing between echo and output on the slide
+mapply(length, pbc)
+```
+\vspace*{-3ex}
+
+## How To Use mapply() in R  
+
+* Overlapping between functions
+
+\begincols[t, onlytextwidth]
+\begincol{0.47\linewidth}
+\vspace*{-3ex}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+myList <- list(x = c(1:6), 
+               y = c("m", "f"), 
+               z = c(30, 4, 23))
+mapply(length, myList, 
+       SIMPLIFY = FALSE)
+```
+
+
+\endcol
+\begincol{0.47\linewidth}
+
+\vspace*{-0.2cm}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE, warning = FALSE}
+lapply(myList, length)
+```
+
+
+\vspace*{0.2cm}
+
+* You can also apply your own functions!
+
+\endcol
+\endcols
+
+## Summary
+
+\blue{apply(), lapply() , sapply(), tapply(), mapply()}
+
+* Useful functions for data manipulation
+* Overlapping between functions
+
+
+## Practice
+
+* Use the following webpage to further investigate the apply family \
+https://emcbiostatistics.shinyapps.io/the_apply_family/
+
+
+

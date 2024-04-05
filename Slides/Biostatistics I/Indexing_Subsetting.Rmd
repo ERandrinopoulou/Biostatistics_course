@@ -1,0 +1,440 @@
+---
+title: "Biostatistics I: Introduction to R"
+subtitle: "Indexing and subsetting"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+```{r setup, include=FALSE}
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+## In this Section
+
+* Indexing
+
+* Subsetting
+
+* A lot of practice
+
+
+## Indexing/Subsetting
+
+* When transforming and analyzing data we often need to select specific observations or variables
+  - Examples: Select ...
+      * the 3rd element of vector age
+      * the 3rd column of the pbc data set
+      * the sex of the 10th patient
+      * all information of the 5th patient
+      * the serum cholesterol for all males
+      * the age for male patients or patients that have serum bilirubin > 3
+      * the first measurement per patient
+    
+
+## Indexing/Subsetting  
+
+* This can be done using square bracket (\textbf{\blue{[ ]}}) notation and indices.
+* Three basic types
+  - position indexing
+  - logical indexing
+  - name indexing
+  
+  
+## Vectors  
+
+\blue{Indexing with \blue{\texttt{vector}}}
+
+* For position indexing, use a \textbf{\blue{positive}} value to select an element
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+x <- c(6:17)
+x
+x[2]
+```
+
+* Use multiple positive values to select multiple elements
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+x[c(2,3,4)]
+```
+
+
+## Vectors  
+
+\blue{Indexing with \blue{\texttt{vector}}}
+
+* For position indexing, use duplicated \textbf{\blue{positive}} values to select the same elements
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+x <- c(6:17)
+x
+x[c(2,2,2)]
+```
+
+
+## Vectors  
+
+\blue{Indexing with \blue{\texttt{vector}}}
+
+* For position indexing, use a \textbf{\blue{negative}} value to remove an element
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+x <- c(6:17)
+x
+x[-5]
+```
+
+\vspace*{3ex}  
+
+* \textbf{\blue{Positive and negative indices cannot be combined}}
+
+
+## Vectors  
+
+\blue{Indexing with \blue{\texttt{vector}}}
+
+* Use logical index of the same length to select elements where the value is \textbf{\blue{TRUE}}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+x <- c(6:10)
+y <- c(TRUE, FALSE, FALSE, FALSE, FALSE)
+x[y]
+```
+
+
+## Vectors  
+
+\blue{Indexing with \blue{\texttt{vector}}}
+
+* Use logical indexing in combination with conditions
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+x <- c(6:10)
+x[x > 7]
+x[x > 7 & x > 9]
+x[x > 7 | x > 9]
+```
+
+
+## Vectors  
+
+\blue{Indexing with \blue{\texttt{vector}}}
+
+* For name/character indexing, use the name of the element
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+x <- c(foo=5, bar=4, one=7, two=12, three=2)
+x[c('foo', 'one')]
+```
+
+* Use the function `names` to obtain the names
+
+
+## Matrices  
+
+\blue{Indexing with \blue{\texttt{matrix}}}
+
+* Indexing matrices is similar to indexing vectors but with double index
+
+  - The first position denotes the rows \blue{["index", ]}
+  - The first position denotes the columns \blue{[, "index"]}
+
+\pause
+
+\begincols[t]
+\begincol{0.5\linewidth}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mat <- matrix(data = 1:4, 
+              nrow = 2, ncol = 2)
+mat
+```  
+  
+\endcol
+\begincol{0.5\linewidth}
+* Use position indexing as:
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mat <- matrix(data = 1:4, 
+              nrow = 2, ncol = 2)
+mat[2, 2]
+```  
+\endcol
+\endcols
+
+
+## Matrices  
+
+\blue{Indexing with \blue{\texttt{matrix}}}
+
+* Be cautious, it also works with a single index. In this case, it selects the particular element of the vector that will be included in the matrix
+
+\begincols[t]
+\begincol{0.5\linewidth}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mat <- matrix(data = 1:4, 
+              nrow = 2, ncol = 2)
+mat[2]
+mat[[2]]
+```  
+  
+\endcol
+\begincol{0.5\linewidth}
+\endcol
+\endcols
+  
+## Matrices  
+
+\blue{Indexing with \blue{\texttt{matrix}}}
+
+\begincols[t]
+\begincol{0.5\linewidth}
+* When we leave a position blank all elements are selected
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mat <- matrix(data = 1:4, 
+              nrow = 2, ncol = 2)
+mat
+mat[2, ]
+```  
+
+\endcol
+\begincol{0.5\linewidth}
+\endcol
+\endcols
+
+
+
+## Arrays 
+
+\blue{Indexing with \blue{\texttt{array}}}
+
+\begincols[t]
+\begincol{0.5\linewidth}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+ar <- array(data = 1:4, 
+            dim = c(1,2,2))
+ar
+```  
+\endcol
+\begincol{0.5\linewidth}
+```{r, eval = TRUE, include = TRUE, echo = TRUE, size = 0.5}
+ar[1, 1, ]
+```  
+
+\endcol
+\endcols
+
+
+## Data Frames  
+
+\blue{Indexing with \blue{\texttt{data.frame}}}
+* Works with single and double index
+
+\begincols[t]
+\begincol{0.55\linewidth}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF <- data.frame(x = 1:3, 
+      y = c("male", "male", "female"))
+DF
+```  
+
+\pause
+
+\endcol
+\begincol{0.45\linewidth}
+* Use position single indexing
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF[2]
+DF[[2]]
+```  
+\endcol
+\endcols
+
+
+
+## Data Frames  
+
+\blue{Indexing with \blue{\texttt{data.frame}}}
+
+\begincols[t]
+\begincol{0.55\linewidth}
+* When using double index, indexing works like a matrix
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF <- data.frame(x = 1:3, 
+      y = c("male", "male", "female"))
+DF
+```  
+
+
+\endcol
+\begincol{0.45\linewidth}
+* Use position indexing
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF[2, ]
+```  
+* Use logical indexing
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+DF[DF$x < 2, ]
+```  
+\endcol
+\endcols
+
+## Data Frames  
+
+\blue{Indexing with \blue{\texttt{data.frame}}}
+
+* \blue{\$} provides a convenient notation to extract an element by name
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+head(pbc$time)
+head(pbc[ ,"time"])
+```  
+
+
+
+
+## Data Frames  
+
+\blue{Indexing with \blue{\texttt{data.frame}}}
+
+* Combine logical and position indexing in data frame
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+head(pbc[pbc$sex == "m", 1:7])
+```  
+
+
+## Data Frames  
+
+\blue{Indexing with \blue{\texttt{data.frame}}}
+
+* Combine logical and position indexing in data frame
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+head(pbc[pbc$age > 30 | pbc$sex == "f", 1:7])
+```  
+
+
+## Data Frames  
+
+\blue{Indexing with \blue{\texttt{data.frame}}}
+
+* Combine logical and position indexing in data frame
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+head(pbc[pbc$age > 30 & pbc$sex == "f", 1:7])
+``` 
+
+
+## Lists  
+
+\blue{Indexing with \blue{\texttt{list}}}
+
+* Lists can be subsetted in the same way as vectors using single brackets - Note that the output is a list
+
+\vspace*{0.6cm}
+
+* Use position indexing
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mylist <- list(y = c(14, 45), z = c("m", "f", "f"))
+mylist[2]
+```  
+
+
+## Lists  
+
+\blue{Indexing with \blue{\texttt{list}}}
+
+* Double square brackets can be also used - Note that the output is a vector
+
+\vspace*{0.6cm}
+
+* Use position indexing
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mylist <- list(y = c(14, 45), z = c("m", "f", "f"))
+mylist[[2]]
+```  
+
+
+## Lists  
+
+\blue{Indexing with \blue{\texttt{list}}}
+
+* \blue{\$} provides a convenient notation to extract an element by name - Note that the output is a vector
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mylist <- list(y = c(14, 45), z = c("m", "f", "f"))
+mylist
+mylist$y
+```  
+
+
+
+## Summary
+
+\begin{columns}[onlytextwidth,T]
+\begin{column}{0.5\linewidth}
+\blue{Vectors}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{[]}
+\item \texttt{[""]} - for categorical variables
+\end{itemize}
+
+\bigskip
+
+\blue{Matrices}
+\begin{itemize}
+\item \texttt{[,]}
+\item \texttt{[[]]}, \texttt{[]}
+\end{itemize}
+
+\bigskip
+
+\blue{Arrays}
+\begin{itemize}
+\item \texttt{[ , , ]}
+\end{itemize}
+\end{column}
+
+
+\begin{column}{0.5\linewidth}
+\blue{Data frames}
+\begin{itemize}
+\item \texttt{[,]}
+\item \texttt{[[]]}, \texttt{[]}
+\item \texttt{\$}
+\end{itemize}
+
+\bigskip
+
+\blue{Lists}
+\begin{itemize}
+\item \texttt{[]}
+\item \texttt{[[]]}
+\item \texttt{\$}
+\end{itemize}
+
+
+\end{column}
+
+\end{columns}
+
+
+## Practice  
+
+* Use the following webpage to further investigate indexing and subsetting \
+https://emcbiostatistics.shinyapps.io/indexing/
+

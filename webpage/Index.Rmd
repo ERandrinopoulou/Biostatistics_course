@@ -1,0 +1,22 @@
+---
+title: "Biostatistics Course"
+author: "Eleni-Rosalina Andrinopoulou, Department of Biostatistics, Erasmus Medical Center"
+date: "`r Sys.setenv(LANG = 'en_US.UTF-8'); format(Sys.Date(), '%d %B %Y')`"
+output: 
+   html_document:
+     toc: true
+     toc_float:
+       collapsed: false
+     includes:
+         after_body: footerEA.html
+---
+
+
+In this webpage, you can find the material of the Biostatistics I and II (NIHES CK020 and CK030) courses. In particular, these consist of the Introduction to R and Statistical tests part.
+ 
+Introduction to R 
+ 
+[Introduction](Z:\Courses\Biostatistical Methods\Slides\Biostatistics I\Introduction.pdf)
+
+Statistical tests
+

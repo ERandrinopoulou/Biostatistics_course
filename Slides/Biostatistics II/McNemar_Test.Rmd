@@ -1,0 +1,330 @@
+---
+title: "Biostatistics II: Hypothesis testing"
+subtitle: |
+  | Categorical data: McNemar test
+  | Multiple testing problem
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+
+* McNemar test
+
+* Examples
+
+* Multiple testing
+
+
+## McNemar test: Theory 
+
+\blue{Assumptions}
+
+- The variables should be categorical
+- Matched data (pairs)
+- Pairs are independent of one another
+- The levels (or categories) of the variables are mutually exclusive
+
+ 
+## McNemar test: Theory   
+
+\blue{Scenario}
+
+Is there a difference in the percentage of patients with asthma between the placebo and the drug group (matched data)?
+ 
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(2021)
+x1 <- sample(0:1, 100, replace = TRUE)
+x2 <- sample(0:1, 100, replace = TRUE)
+
+tab <- table(x1, x2)
+
+tab <- matrix(c("a", "b", "a + b", "c", "d", "c + d", "a + c", "b + d", "n"), 3, 3, byrow = TRUE)
+
+colnames(tab) <- c("Drug (asthma)", "Drug (no asthma)", "Total")
+rownames(tab) <- c("Placebo (asthma)", "Placebo (no asthma)", "Total")
+
+library(knitr)
+kable(tab)
+```
+
+\blue{Hypothesis}
+
+\begincols
+  \begincol{0.6\textwidth}
+
+
+$H_0: p_a + p_b = p_a + p_c$ and $p_c + p_d = p_d + p_b$ \newline
+$H_1: p_a + p_b \neq p_a + p_c$ and $p_c + p_d \neq p_d + p_b$ 
+
+ 
+\endcol
+\begincol{0.2\linewidth}
+
+$H_0: p_b = p_c$\newline
+$H_1: p_b \neq p_c$
+
+ \endcol
+\endcols
+
+
+## McNemar test: Theory   
+
+\blue{Connection with regression} 
+
+Conditional logistic model with one binary covariate\newline
+$\pi = \frac{Pr(Y_{s, drug}= asthma\ \&\ Y_{s, placebo} = no\ asthma)}{Pr(Y_{s, drug}= asthma\ \&\ Y_{s, placebo} = no\ asthma) + Pr(Y_{s, drug}= no \ asthma\ \&\ Y_{s, placebo} = asthma)} = \frac{p_c}{p_c+p_b}$
+
+\blue{Hypothesis}
+
+$H_0: \beta = 0$\
+$\beta = \texttt{logit}(\pi) = 0$ 
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+if we know that $\texttt{logit}(\pi) = \texttt{log}\big( \frac{\pi}{1-\pi}\big)$
+$\Rightarrow$\newline
+$\beta = \texttt{log}\bigg(\frac{ \frac{p_c}{p_c+p_b}   }{1 - \frac{p_c}{p_c+p_b}}\bigg) = \texttt{log} \bigg( \frac{\frac{p_c}{p_c+p_b}}{\frac{p_c+p_b-p_c}{p_c+p_b}}  \bigg) = \texttt{log}\big\{\frac{p_c(p_c+p_b)}{p_b(p_c+p_b)}\big\} = \texttt{log}\big(\frac{p_c}{p_b}  \big)$
+}
+\end{tcolorbox}
+
+$\beta = 0$
+$\Rightarrow$
+$\texttt{log}\big(\frac{p_c}{p_b}\big) = 0$ $\Rightarrow$ 
+$\frac{p_c}{p_b} = 1$ $\Rightarrow$ $p_c = p_b$
+
+
+## McNemar test: Theory  
+
+\blue{Test statistic}
+
+$X^2 = \frac{(b-c)^2}{b+c}$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+When the values in the contingency table are fairly small a “correction for continuity” may be applied to the test statistic:
+ $X^2 = \frac{(|b-c| - 1)^2}{b+c}$
+}
+\end{tcolorbox}
+
+
+## McNemar test: Theory  
+
+\blue{Sampling distribution}
+
+- $\chi^2$-distribution with $df = 1$
+- Critical value and p-value
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($X^2$) with the critical value or the p-value with $\alpha$
+
+
+
+
+## McNemar test: Application
+
+\blue{Scenario} 
+
+Is there a difference in the percentage of patients with asthma between the placebo and the drug group (matched data)?
+
+\blue{Hypothesis}
+
+$H_0: p_b = p_c$\newline
+$H_1: p_b \neq p_c$
+
+
+## McNemar test: Application
+
+\blue{Collect and visualize data}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(2021)
+x1 <- sample(0:1, 50, replace = TRUE)
+x2 <- sample(0:1, 50, replace = TRUE)
+
+tab <- table(x1, x2)
+
+colnames(tab) <- c("Drug (asthma)", "Drug (no asthma)")
+rownames(tab) <- c("Placebo (asthma)", "Placebo (no asthma)")
+
+library(knitr)
+kable(addmargins(tab))
+```
+
+
+\blue{Test statistic}
+
+$X^2 = \frac{(b-c)^2}{b+c} = \frac{(13-18)^2}{13+18} = 0.81$ (with no continuity correction)
+
+\blue{Degrees of freedom}
+
+$df = 1$
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+
+## McNemar test: Application
+
+\blue{Critical values}
+
+Using ```R``` we get the critical values from the $\chi^2$-distribution:\newline
+critical value$_{\alpha}$ = critical value$_{0.05}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qchisq(p = 0.05, df = 1, lower.tail = FALSE)
+```
+
+
+## McNemar test: Application
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $X^2$ > critical value$_{\alpha}$ 
+
+We have 0.81 < 3.84 $\Rightarrow$ we do not reject the $H_0$
+\newline\newline
+Using ```R``` we obtain the p-value from the $\chi^2$-distribution:
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+pchisq(q = 0.81, df = 1, lower.tail = FALSE)
+```
+
+
+
+
+
+
+## Multiple testing 
+
+- A single statistical test is rarely assumed
+- If we perform $m$ independent tests, what is the probability of at least 1 false positive?
+
+  - P(Making an error) = $\alpha$
+  - P(Not making an error) = $1 - \alpha$
+  - P(Not making an error in $m$ tests) = $(1 - \alpha)^m$
+  - P(Making at least 1 error in $m$ tests) = $1 - (1 - \alpha)^m$
+
+ 
+## Multiple testing 
+ 
+\blue{Visualize this...}
+\vspace*{-1cm}
+```{r, echo = FALSE, fig.height=4, fig.width=5}
+m <- c(1:100)
+alpha <- 0.05
+y <- 1 - (1 - alpha)^m 
+plot(m, y, xlab = "Hypothesis tests", ylab = "Probability of at least 1 false positive", pch = 16,
+     cex.axis = 0.5, cex.lab = 0.7)
+```
+
+ 
+## Multiple testing
+
+Methods to adjust for multiple testing:
+
+- \textbf{\textcolor{EMC60}{Bonferroni adjustment}}: multiply the number of simultaneously tested hypothesis, e.g. $p-value = min(p-value * m, 1)$ or adjust the significant level to $\alpha = \alpha / m$
+- \textbf{\textcolor{EMC60}{Holm adjustment}}: $\alpha_i = \frac{\alpha}{m - i + 1}$, where $i$ is the order of the hypothesis - we start from the smallest to the largest p-value
+- \textbf{\textcolor{EMC60}{Hochberg adjustment}}: $\alpha_i = \frac{\alpha}{m - i + 1}$, where $i$ is the order of the hypothesis - we start from the largest p-value
+
+ 
+## Multiple testing 
+
+\blue{\textit{It is not as easy as you think}}
+
+- What about the other institutions analyzing data from the same experiment?
+- What about previous papers that were published on the same data?
+
+\blue{Be transparent about what you have done!}
+
+- Report effect sizes, confidence intervals, and p-values (avoid arbitrary bounds, e.g P < 0.05; P > 0.4)
+- Report whether you have adjusted for multiple testing or not
+
+
+## Multiple testing 
+
+\blue{Note that...}
+
+- In studies with a clear primary hypothesis, adjustment is not necessary
+- If in one manuscript one or more secondary outcomes are presented, then adjustment for multiple comparisons may be considered
+
+\blue{Take care}: Strict rules such as always adjust for all comparisons will motivate authors to remove/ignore non significant results to decrease the number of comparisons
+
+
+## Further reading
+
+- Althouse AD. Adjust for multiple comparisons? It’s not that simple. The Annals of thoracic surgery. 2016 May 1;101(5):1644-5.
+- Chen SY, Feng Z, Yi X. A general introduction to adjustment for multiple comparisons. Journal of thoracic disease. 2017 Jun;9(6):1725.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

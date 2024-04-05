@@ -1,0 +1,290 @@
+---
+title: "Biostatistics I: Descriptive Statistics"
+subtitle: "Correlation"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+
+* Correlation coefficients
+
+* Examples
+
+
+
+## Correlation
+
+Correlation is a measure that describes the strength of the association between two variables. Let’s assume that we have two continuous variables, we can get the following relationships:
+\newline
+\begincols
+  \begincol{0.3\textwidth}
+
+\blue{Positive correlation}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 4}
+library(MASS)
+set.seed(2021+1)
+
+r = 0.83
+data = mvrnorm(n = 50, mu = c(0, 0), 
+               Sigma = matrix(c(1, r, r, 1), nrow=2), 
+               empirical = TRUE)
+x = data[, 1]  
+y = data[, 2]  
+dat <- data.frame(x = x, y = y)
+
+plot(x, y, pch = 16, xlab = "Variable 1", ylab = "Variable 2")
+```
+
+ \endcol
+\begincol{0.3\linewidth}
+
+\blue{Negative correlation}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 4}
+library(MASS)
+set.seed(2021+1)
+
+r = -0.83
+data = mvrnorm(n = 50, mu = c(0, 0), 
+               Sigma = matrix(c(1, r, r, 1), nrow=2), 
+               empirical = TRUE)
+x = data[, 1]  
+y = data[, 2]  
+dat <- data.frame(x = x, y = y)
+
+plot(x, y, pch = 16, xlab = "Variable 1", ylab = "Variable 2")
+```
+
+ \endcol
+\begincol{0.3\linewidth}
+
+\blue{No correlation}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 4}
+library(MASS)
+set.seed(2021+1)
+
+r = 0.2
+data = mvrnorm(n = 50, mu = c(0, 0), 
+               Sigma = matrix(c(1, r, r, 1), nrow=2), 
+               empirical = TRUE)
+x = data[, 1]  
+y = data[, 2]  
+dat <- data.frame(x = x, y = y)
+
+plot(x, y, pch = 16, xlab = "Variable 1", ylab = "Variable 2")
+```     
+
+ \endcol
+\endcols
+
+
+## Pearson Correlation
+
+- magnitude of association
+- linear association
+- direction of the relationship
+
+A relationship is linear when a change in one variable is associated with a proportional change in the other variable
+
+Pearson Correlation: $corr(X, Y) = \frac{cov(X, Y)}{sd(X)sd(Y)}$,
+
+where $cov(X, Y)$ is the covariance and $sd(X)$, $sd(Y)$ are the standard deviations
+
+
+## Spearman Correlation
+
+- direction of the relationship
+- monotonic relationship
+
+In a monotonic relationship, the variables tend to change together, but not always at a constant rate (as in the linear case)
+
+The Spearman correlation coefficient is based on the ranked values:
+$corr_R(X, Y) = \frac{cov(R_X, R_Y)}{sd(R_X)sd(R_Y)}$
+\newline
+
+\blue{\textit{What is rank?}}
+Ranks are integers indicating the rank of some values. E.g. the rank of 3, 10, 16, 6, 2 is 2, 4, 5, 3, 1:
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+rank(c(3, 10, 16, 6, 2))
+```
+
+
+## Difference between Pearson and Spearman
+
+\begincols
+  \begincol{0.5\textwidth}
+
+\blue{Weak positive correlation:}
+      
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 4}
+library(MASS)
+r = 0.5
+set.seed(123)
+add_legend <- function(...) {
+  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
+    mar=c(0, 0, 0, 0), new=TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+  legend(...)
+}
+data = mvrnorm(n = 50, mu = c(0, 0), 
+               Sigma = matrix(c(1, r, r, 1), nrow=2), 
+               empirical = TRUE)
+x = data[, 1]  
+y = data[, 2]  
+dat <- data.frame(x = x, y = y)
+
+par(mar = c(5, 4, 1.7, 0.2))
+plot(x, y, pch = 16, xlab = "Variable 1", ylab = "Variable 2")
+p1 <- cor(x, y, method = "pearson")
+p2 <- cor(x, y, method = "spearman")
+add_legend("topright", c("Pearson = 0.5", "Spearman = 0.51"), horiz = TRUE, bty = 'n') 
+```         
+
+
+ \endcol
+\begincol{0.5\linewidth}
+
+\blue{Strong positive correlation:}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 4}
+library(MASS)
+set.seed(123)
+add_legend <- function(...) {
+  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
+    mar=c(0, 0, 0, 0), new=TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+  legend(...)
+}
+
+r = 0.9
+data = mvrnorm(n = 50, mu = c(0, 0), 
+               Sigma = matrix(c(1, r, r, 1), nrow=2), 
+               empirical = TRUE)
+x = data[, 1]  
+y = data[, 2]  
+dat <- data.frame(x = x, y = y)
+
+par(mar = c(5, 4, 1.7, 0.2))
+plot(x, y, pch = 16, xlab = "Variable 1", ylab = "Variable 2")
+p1 <- cor(x, y, method = "pearson")
+p2 <- cor(x, y, method = "spearman")
+add_legend("topright", c("Pearson = 0.9", "Spearman = 0.8"), horiz = TRUE, bty = 'n')    
+```   
+
+ \endcol
+\endcols
+
+
+
+## Difference between Pearson and Spearman
+
+\begincols
+  \begincol{0.5\textwidth}
+
+\blue{Linear VS monotonic relationship:}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 4}
+set.seed(123)
+add_legend <- function(...) {
+  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
+    mar=c(0, 0, 0, 0), new=TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+  legend(...)
+}
+x <- c(1:20)
+y <- c(50, 50, 49.5, 49, 48.6, 48.3, 47.7, 47, 46.6, 46.4, 45.9, 45.5, 45, 40, 35, 25, 20, 10, 5, 0)
+
+
+par(mar = c(5, 4, 1.7, 0.2))
+plot(x, y, pch = 16, xlab = "Variable 1", ylab = "Variable 2")
+p1 <- cor(x, y, method = "pearson")
+p2 <- cor(x, y, method = "spearman")
+add_legend("topright", c("Pearson = -0.85", "Spearman = -0.99"), horiz = TRUE, bty = 'n')
+```  
+
+ \endcol
+\begincol{0.5\linewidth}
+
+\blue{What if there is a correlation but this is not linear?}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 4}
+set.seed(123)
+add_legend <- function(...) {
+  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
+    mar=c(0, 0, 0, 0), new=TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+  legend(...)
+}
+x <- c(1:29)
+y <- c(22, 20, 27, 25, 27, 38, 30, 33, 44, 47, 46, 49, 47, 48.3, 47.7, 47, 45, 46.4, 45.9, 45.5, 30, 45, 40, 34, 35, 32, 25, 20, 22)
+
+
+par(mar = c(5, 4, 1.7, 0.2))
+plot(x, y, pch = 16, xlab = "Variable 1", ylab = "Variable 2")
+p1 <- cor(x, y, method = "pearson")
+p2 <- cor(x, y, method = "spearman")
+add_legend("topright", c("Pearson = 0.06", "Spearman = 0.04"), horiz = TRUE, bty = 'n')
+``` 
+
+ \endcol
+\endcols
+
+
+## Other Correlation Measures
+
+  - \blue{Point-Biserial}: It evaluates the association between a continuous variable with a categorical (dichotomous) variable
+  - \blue{Intraclass}: It evaluates the association between two continuous variables that are structured in groups 
+  
+\blue{\textit{Note}}
+
+- Correlation must not be confused with causality
+- If two variables are correlated, it does not imply that one variable causes the changes in another variable
+
+

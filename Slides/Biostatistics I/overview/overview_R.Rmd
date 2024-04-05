@@ -1,0 +1,337 @@
+---
+title: "Biostatistics I: Introduction to R"
+subtitle: "Introduction"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation:
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+
+## Introduction to R
+
+* **R** is a great tool to explore and investigate the data
+* Several statistical methods can be performed with **R**
+* It is important to understand the methods before applying them in **R**
+
+\vspace*{0.9cm}
+
+\begin{block}{How to use}
+\textbf{R} uses packages that perform specific tasks
+\begin{itemize}
+\item Install package only once
+\item Load package every time you open \textbf{R}
+\end{itemize}
+\end{block}
+
+
+
+## Introduction to R 
+
+* For this course: Rstudio (http://www.rstudio.org/)
+  - free
+  - works fine in Windows, MacOS and Linux
+  - helpful with errors
+  - alternative output options
+  
+  
+  
+
+## Introduction to R 
+
+\begin{columns}[onlytextwidth,T]
+\begin{column}{0.30\linewidth}
+
+
+\blue{Basic functions}
+\begin{itemize}
+\item \texttt{getwd()}, \texttt{setwd()}, 
+\item \texttt{is.na()}, \texttt{is.finite()}, \texttt{is.null()}
+\end{itemize}
+
+\end{column}
+
+\begin{column}{0.58\linewidth}
+
+
+\blue{Import/Export}
+\begin{itemize}
+\item \texttt{read.csv()}, \texttt{write.csv()}
+\item \texttt{read.xlsx()}, \texttt{write.xlsx()}
+\item \texttt{read.table()}, \texttt{write.table()}
+\end{itemize}
+
+\bigskip
+
+\blue{Save/Load}
+\begin{itemize}
+\item \texttt{save()}, \texttt{saveRDS()}
+\item \texttt{load()}, \texttt{readRDS()}
+\end{itemize}
+
+
+\end{column}
+
+
+\end{columns}
+
+
+## Data Types/Structures
+
+The simplest data types are:
+
+* \textbf{\blue{numeric}} : quantitative data
+* \textbf{\blue{character}} : qualitative data
+* \textbf{\blue{integer}} : whole numbers
+* \textbf{\blue{logical}} : TRUE or FALSE
+* \textbf{\blue{factors}} : qualitative data (levels)
+
+
+## Data Types/Structures  
+
+The most important data structures are:
+
+  - \textbf{\blue{Scalar}} a single element
+  - \textbf{\blue{Vectors}} have the same type of elements
+  - \textbf{\blue{Matrices}} have the same type of elements with the same length 
+  - \textbf{\blue{Arrays}} have the same type of elements with the same length but can store the data in more than two dimensions
+  - \textbf{\blue{Data frames}} have elements of different type with the same length 
+  - \textbf{\blue{Lists}} have elements of different type and length 
+
+
+## Data Types/Structures 
+
+\begin{columns}[onlytextwidth,T]
+\begin{column}{0.60\linewidth}
+
+\bigskip
+
+\blue{Data types}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{is.numeric()} / \texttt{as.numeric()}
+\item \texttt{is.character()} / \texttt{as.character()}
+\item \texttt{is.integer()} / \texttt{as.integer()}
+\item \texttt{is.logical} / \texttt{as.logical()}
+\item \texttt{is.factor()} / \texttt{as.factor()}
+\item \texttt{str()}, \texttt{mode()}
+\end{itemize}
+
+\end{column}
+
+\begin{column}{0.3\linewidth}
+
+\blue{Data structures}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{c()}
+\item \texttt{matrix()}
+\item \texttt{array()}
+\item \texttt{data.frame()}
+\item \texttt{list()}
+\end{itemize}
+
+\bigskip
+
+\blue{Other}
+\begin{itemize}
+\item \texttt{ls()}, \texttt{objects()}
+\end{itemize}
+
+\end{column}
+\end{columns}
+
+
+
+## Indexing/Subsetting  
+
+* This can be done using square bracket (\textbf{\blue{[ ]}}) notation and indices.
+* Three basic types
+  - position indexing
+  - logical indexing
+  - name indexing
+  
+  
+## Indexing/Subsetting
+
+\begin{columns}[onlytextwidth,T]
+\begin{column}{0.5\linewidth}
+\blue{Vectors}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{[]}
+\item \texttt{[""]} - for categorical variables
+\end{itemize}
+
+\bigskip
+
+\blue{Matrices}
+\begin{itemize}
+\item \texttt{[,]}
+\item \texttt{[[]]}, \texttt{[]}
+\end{itemize}
+
+\bigskip
+
+\blue{Arrays}
+\begin{itemize}
+\item \texttt{[ , , ]}
+\end{itemize}
+\end{column}
+
+
+\begin{column}{0.5\linewidth}
+\blue{Data frames}
+\begin{itemize}
+\item \texttt{[,]}
+\item \texttt{[[]]}, \texttt{[]}
+\item \texttt{\$}
+\end{itemize}
+
+\bigskip
+
+\blue{Lists}
+\begin{itemize}
+\item \texttt{[]}
+\item \texttt{[[]]}
+\item \texttt{\$}
+\end{itemize}
+
+
+\end{column}
+
+\end{columns}
+
+
+
+
+
+## Data Transformation/Exploration/Visualization
+
+\begin{columns}[onlytextwidth,T]
+\begin{column}{0.30\linewidth}
+
+
+\blue{Transformation}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{round()}
+\item \texttt{factor()}
+\item \texttt{order()}
+\item \texttt{reshape()}
+\end{itemize}
+\end{column}
+
+\begin{column}{0.30\linewidth}
+\blue{Exploration}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{mean()}, \texttt{sd()}
+\item \texttt{median()}, \texttt{IQR()}
+\item \texttt{table()}
+\end{itemize}
+\end{column}
+
+\begin{column}{0.30\linewidth}
+\blue{Visualization}
+\begin{itemize}
+\item \texttt{plot()}, \texttt{legend()}
+\item \texttt{hist()}
+\item \texttt{barchart()}
+\item \texttt{boxplot()}
+\item \texttt{xyplot()}, \texttt{ggplot()}
+\item \texttt{par()}
+\end{itemize}
+\end{column}
+
+\end{columns}
+
+
+
+## Correlation
+
+Pearson correlation
+
+- magnitude of association
+- linear association
+- direction of the relationship
+
+A relationship is linear when a change in one variable is associated with a proportional change in the other variable
+
+
+## Correlation
+
+Spearman correlation
+
+- direction of the relationship
+- monotonic relationship
+
+In a monotonic relationship, the variables tend to change together, but not always at a constant rate (as in the linear case)
+
+
+
+## Test hypothesis  
+
+* \blue{parametric} (assumptions about the distribution) / \blue{non-parametric} (distribution-free)
+
+\vspace*{0.3cm}
+
+* \blue{one sample} / \blue{two samples} / .. / \blue{$M$ samples}
+
+\vspace*{-0.3cm}
+
+\begincols
+  \begincol{0.4\linewidth}
+  
+\begin{itemize}
+\item compare one group with a value
+\item compare two groups 
+     
+      paired / unpaired
+     
+\item compare $M$ groups 
+\end{itemize}
+
+ \endcol
+\begincol{0.48\linewidth}
+
+
+
+ \endcol
+\endcols
+
+\vspace*{-0.2cm}
+
+* \blue{one-sided (one-tailed)} / \blue{two-sided (two-tailed)}
+
+\begincols
+  \begincol{0.3\linewidth}
+
+$H_0: \theta = \theta_0$
+
+ \endcol
+\begincol{0.48\linewidth}
+
+$H_1: \theta \neq \theta_0$ (two-sided)\
+$H_1: \theta > \theta_0$ (one-sided) \
+$H_1: \theta < \theta_0$ (one-sided) 
+
+ \endcol
+\endcols
+
+\vspace*{7cm}
+
+
+## Test hypothesis
+
+- Choose a null hypothesis $H_0$ and an alternative hypothesis $H_1$
+- Collect and visualize the data
+- Choose and calculate the test statistic, which is a numerical summary of the data
+- Determine the sampling distribution under the condition that the null-hypothesis holds
+- Choose the type I error (significant level) $\alpha$, usually $\alpha$=0.05
+- Determine the corresponding critical value(s)
+- Compare the test statistic with critical value(s) and reject or not
+ 

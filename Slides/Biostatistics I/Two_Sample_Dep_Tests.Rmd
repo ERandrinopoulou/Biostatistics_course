@@ -1,0 +1,650 @@
+---
+title: "Biostatistics I: Hypothesis testing"
+subtitle: "Continuous data: Two-sample (dependent) tests"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+
+* Two-sample t-test (dependent samples)
+
+* Two-sample Wilcoxon signed-rank test (dependent samples)
+
+* Examples
+
+
+ 
+## Two-sample t-test (dependent samples): Theory   
+
+\blue{Assumptions}
+
+* The dependent variables are continuous
+* The observations are dependent
+* The distribution of the differences in the variable between the two correlated groups are approximately normally distributed
+* The dependent variables do not contain any outliers
+
+
+
+## Two-sample t-test (dependent samples): Theory   
+
+\blue{Scenario} 
+
+Is the mean BMI of the students before the exams different from the mean BMI of the students after the exams?
+
+\blue{Connection with linear regression}
+
+$y_{2i} - y_{1i} = \beta_0 + \beta_1x_i + \epsilon_i$, where $x_i = 0$
+\newline\newline
+$H_0: \beta_0 = 0$\newline
+$H_1: \beta_0 \neq 0$
+
+
+
+## Two-sample t-test (dependent samples): Theory   
+
+\blue{Scenario} 
+
+Is the mean BMI of the students in my university different from the BMI of all students?
+
+
+\blue{Alternatively}
+
+$H_0: \mu_1 - \mu_2 = 0$\newline
+$H_1: \mu_1 - \mu_2 \neq 0$
+
+
+## Two-sample t-test (dependent samples): Theory    
+
+\begincols
+  \begincol{0.5\textwidth}
+
+```{r include = TRUE, cache = TRUE, warning = FALSE, eval = TRUE, fig.height=3, fig.width=4, dpi=272, dev='png'}
+set.seed(2021)
+x1 <- rnorm(50, 20, 5)
+x2 <- rnorm(50, 20, 5)
+
+id1 <- c(1:50)
+id2 <- c(101:150)
+dat <- data.frame(id = c(id1, id2), x = c(x1, x2))
+
+library(ggplot2)
+library(ggimage)
+
+df_img <- data.frame(phase = c("Clipart"),
+                     image = c("clipart.png"))
+df_img$phase <- factor(df_img$phase, levels = df_img$phase)
+
+ggplot(dat, aes(x = id, y = x)) +
+  geom_segment(aes(x = 1, xend = 50, y = 20, yend = 20), 
+               col = "#5379aa", lwd = 2) +
+  geom_segment(aes(x = 101, xend = 150, y = 20, yend = 20), 
+               col = rgb(0.6769,0.4447,0.7114), lwd = 2) +
+  geom_image(aes(image = df_img$image), size = 0.02, col = "white") +
+  labs(x = "", y = "BMI") + 
+  theme(axis.text.x = element_blank(), 
+        panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),    
+        axis.text.y=element_blank(), axis.ticks = element_blank()) +
+  annotate(geom = "text", x = 24, y = 52, label = "Before",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = 120, y = 52, label = "After",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -15, y = 20, 
+           label = expression(paste(y[1], "=", mu[1])),
+              color = "white", cex = 4.5) + 
+  annotate(geom = "text", x = 85, y = 20, 
+           label = expression(paste(y[2], "=", mu[2])),
+              color = "white", cex = 4.5) +
+  geom_vline(xintercept = 70, col = "white", lwd = 1) +
+  ylim(0, 54) + xlim(-20, 160) +
+  ggtitle("Null hypothesis")
+```
+
+ \endcol
+\begincol{0.5\linewidth}
+
+```{r include = TRUE, cache = TRUE, warning = FALSE, eval = TRUE, fig.height=3, fig.width=4, dpi=272, dev='png'}
+set.seed(2021)
+x1 <- rnorm(50, 20, 5)
+x2 <- rnorm(50, 35, 5)
+
+id1 <- c(1:50)
+id2 <- c(101:150)
+dat <- data.frame(id = c(id1, id2), x = c(x1, x2))
+
+library(ggplot2)
+library(ggimage)
+
+df_img <- data.frame(phase = c("Clipart"),
+                     image = c("clipart.png"))
+df_img$phase <- factor(df_img$phase, levels = df_img$phase)
+
+ggplot(dat, aes(x = id, y = x)) +
+  geom_segment(aes(x = 1, xend = 50, y = 20, yend = 20), 
+               col = "#5379aa", lwd = 2) +
+  geom_segment(aes(x = 101, xend = 150, y = 35, yend = 35), 
+               col = rgb(0.6769,0.4447,0.7114), lwd = 2) +
+  geom_image(aes(image = df_img$image), size = 0.02, col = "white") +
+  labs(x = "", y = "BMI") +
+  theme(axis.text.x = element_blank(), 
+        panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),    
+        axis.text.y=element_blank(), axis.ticks = element_blank()) +
+  annotate(geom = "text", x = 24, y = 52, label = "Before",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = 120, y = 52, label = "After",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -15, y = 20, 
+           label = expression(paste(y[1], "=", mu[1])),
+              color = "white", cex = 4.5)  +
+  annotate(geom = "text", x = 85, y = 34, 
+           label = expression(paste(y[2], "=", mu[2])),
+              color = "white", cex = 4.5) +
+  geom_vline(xintercept = 70, col = "white", lwd = 1) +
+  ylim(0, 54) + xlim(-20, 160) +
+  ggtitle("Alternative hypothesis")
+```
+
+ \endcol
+\endcols
+
+
+
+## Two-sample t-test (dependent samples): Theory     
+
+\blue{Test statistic}
+
+$t = \frac{(\bar{x}_1 - \bar{x}_2) - (\mu_1 - \mu_2)}{sd(x)/\sqrt{n}}$,
+where\
+
+- Sample mean of group 1: $\bar{x}_1$
+- Sample mean of group 2: $\bar{x}_2$
+- Standard deviation of the difference: $sd(x)$
+- Number of subjects: $n$
+
+\blue{Sampling distribution}
+
+- $t$-distribution with $df = n - 1$ 
+- Critical values and p-value
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($t$) with the critical values or the p-value with $\alpha$
+
+
+
+## Two-sample t-test (dependent samples): Application
+
+\blue{Scenario} 
+
+Is the mean BMI of the students before the exams different from the mean BMI of the students after the exams?
+
+\blue{Hypothesis}
+
+$H_0: \mu_1 - \mu_2 = 0$\newline
+$H_1: \mu_1 - \mu_2 \neq 0$
+
+
+## Two-sample t-test (dependent samples): Application
+
+\blue{Collect and visualize data}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+library(gridExtra)
+set.seed(2021+2)
+
+difference_BMI <- rnorm(50, 3, 4)
+id <- 1:50
+df <- data.frame(id, difference_BMI)
+
+ggplot(df, aes(x=difference_BMI)) + 
+  geom_histogram(bins = 6, fill = rgb(0.6769,0.4447,0.7114)) +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(x = "Difference in BMI")
+```
+
+
+
+## Two-sample t-test (dependent samples): Application
+
+\begincols
+  \begincol{0.6\linewidth}
+
+\blue{Hypothesis}
+
+$H_0: \mu_1 - \mu_2 = 0$\newline
+$H_1: \mu_1 - \mu_2 \neq 0$\newline
+
+\blue{Test statistic}
+
+Let's assume that:
+
+- Sample mean before: $\bar{x}_1 = 24$
+- Sample mean after: $\bar{x}_2 = 25$
+- Standard deviation of the difference: $sd(x) = 4$
+- Number of subjects: $n = 50$
+ 
+$t = \frac{\bar{x}_1 - \bar{x}_2}{sd(x)\sqrt{n}} = \frac{24-25}{4/ \sqrt(50)} = -1.77$\
+
+ \endcol
+\begincol{0.4\linewidth}
+
+\vspace*{-3.5cm}
+
+\blue{Degrees of freedom}
+
+$df = n - 1 = 49$\newline
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+ \endcol
+\endcols
+
+
+
+## Two-sample t-test (dependent samples): Application  
+
+\begincols
+  \begincol{0.6\linewidth}
+
+\blue{Critical values}
+
+Using ```R``` we get the critical values from the $t$-distribution:\newline
+critical value$_{\alpha/2}$ = critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qt(p = 0.05/2, df = 49, lower.tail = FALSE)
+```
+
+-critical value$_{\alpha/2}$ = -critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qt(p = 0.05/2, df = 49, lower.tail = TRUE)
+```
+
+ \endcol
+\begincol{0.4\linewidth}
+
+\textcolor{white}{texttestestesstdfgzdfgdfgdfgdsdfg}
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = 2, xend = 2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),       
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[2]), limits = c(-3.5,3.5),
+                     labels=c("2.01"))
+```
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = -2, xend = -2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1]), limits = c(-3.5,3.5),
+                     labels=c("-2.01"))
+```
+
+ \endcol
+\endcols
+
+
+## Two-sample t-test (dependent samples): Application 
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $t$ > critical value$_{\alpha/2}$ or $t$ < - critical value$_{\alpha/2}$
+
+We have -1.77 > -2.01 $\Rightarrow$ we do not reject the $H_0$
+
+\begincols
+  \begincol{0.6\linewidth}
+  
+Using ```R``` we obtain the p-value from the $t$-distribution:
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * pt(q = -1.77, df = 49, lower.tail = TRUE)
+```
+
+\endcol
+\begincol{0.4\linewidth}
+
+\vspace{0.6cm}
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(100000, mu, SD)
+RI <- c(mu - 0.3 * SD, mu + 0.3 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= 2.6 , x, 30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= -2.6 , x, -30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = "92%",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -2.7, y = 0.01, label = "8/2%",
+              color = "white", cex = 3) +
+  annotate(geom = "text", x = 2.7, y = 0.01, label = "8/2%",
+              color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.4), xlim = c(-4, 4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),    
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(-2.6, 2.6),
+                     labels=c("-1.77", "1.77"))
+```
+
+ \endcol
+\endcols
+
+
+
+
+
+
+
+
+
+
+
+ 
+## Two-sample Wilcoxon signed rank test: Theory   
+
+\blue{Assumptions}
+
+* Population distribution of the differences is symmetric
+* The observations are dependent
+
+
+## Two-sample Wilcoxon signed rank test: Theory   
+
+\blue{Scenario} 
+
+Is the median score value of the students in my university different this year compared to next year?
+
+
+\blue{Connection with linear regression}
+
+$signed\_rank(y_{2i}-y_{1i}) = \beta_0 + \beta_1x_i + \epsilon_i,$ where $x_i = 0$  
+
+$H_0: \beta_0 = 0$\newline
+$H_1: \beta_0 \neq 0$
+
+\blue{Alternatively}
+
+$H_0: m_1 = m_2$ \newline
+$H_1: m_1 \neq m_2$ 
+
+
+
+
+## Two-sample Wilcoxon signed rank test: Theory   
+
+\blue{Test statistic}
+
+- Calculate the ranks of the absolute difference
+     - If there are ties you assign the average of the tied ranks
+     - If a pair of scores is equal then they are considered tied and dropped from the analysis and the sample size is reduced
+- Obtain the sum of those ranks where the difference was positive $W_+ = \sum R_d^+$ or negative $W_- = \sum R_d^-$. The test statistic ($W$) is the minimum of $W_+$ and $W_-$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+If \textbf{one-tailed}: use either $W_+$ or $W_-$ for the test statistic ($W$) depending on the direction of the alternative hypothesis 
+}
+\end{tcolorbox}
+
+
+
+## Two-sample Wilcoxon signed rank test: Theory  
+
+\blue{Sampling distribution}
+
+\textcolor{EMC60}{For large sample size:} we can use the normal approximation, that is, $W$ is normally distributed.
+
+\vspace*{0.2cm}
+
+\begincols
+  \begincol{0.4\textwidth}
+
+$\mu_W = \frac{n(n+1)}{4}$\newline
+$\sigma_w = \sqrt{  \frac{n(n+1)(2n+1)}{24}  }$\newline
+$z = \frac{ |max(W_+, W_-) - \mu_W| - 1/2}{\sigma_W}$
+
+\endcol
+\begincol{0.5\linewidth}
+
+\scriptsize \textit{When there are ties, the mean stays the same but the variance is reduced by a quantity}
+
+ \endcol
+\endcols
+
+\vspace*{0.2cm}
+
+\textcolor{EMC60}{For small sample size:} we can use the exact distribution (more details in the application).
+
+
+- Get critical values and p-value
+
+
+## Two-sample Wilcoxon signed rank test: Theory  
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+
+\blue{Draw conclusions}
+
+- Compare test statistic with the critical values or the p-value with $\alpha$
+
+
+
+## Two-sample Wilcoxon signed rank test: Application
+
+\blue{Scenario} 
+
+Is the median score value of the students in my university different this year compared to next year?
+
+\blue{Hypothesis}
+
+$H_0: m_1 = m_2$\newline
+$H_1: m_1 \neq m_2$
+
+
+## Two-sample Wilcoxon signed rank test: Application
+
+\blue{Collect and visualize data}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(1552)
+x <- rnorm(3, 5, 2) 
+x <- round(x, digits = 0)
+y <- rnorm(3, 6, 2) 
+y <- round(y, digits = 0) 
+difference <- x - y
+rank_d <- NA
+rank_d1 <- rank(abs(difference[difference != 0]))
+rank_d[which(difference != 0)] <- rank_d1
+dat <- data.frame(x = x, y = y, difference = difference, 
+                  abs_diferences = abs(difference), rank_d = rank_d)
+colnames(dat) <- c("x", "y", "Difference", "|Difference|", "rank")
+
+library(knitr)
+kable(dat)
+```
+
+\vspace*{0.5cm}
+
+\begincols
+  \begincol{0.4\textwidth}
+  
+\blue{Hypothesis}
+
+$H_0: m_1 = m_2$\newline
+$H_1: m_1 \neq m_2$\newline
+
+\endcol
+\begincol{0.5\linewidth}
+
+\vspace*{-0.1cm}
+
+\blue{Test statistic}
+
+$W_- = 6$ and $W_+ = 0$\newline
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+ \endcol
+\endcols
+
+
+
+
+## Two-sample Wilcoxon signed rank test: Application
+  
+\blue{Critical values}
+
+Using ```R``` we get the critical values from the exact distribution:\newline
+low critical value$_{\alpha/2}$ = low critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qsignrank(p = 0.05/2, n = 3, lower.tail = TRUE)
+```
+
+high critical value$_{\alpha/2}$ = high critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qsignrank(p = 0.05/2, n = 3, lower.tail = FALSE)
+```
+
+
+
+
+## Two-sample Wilcoxon signed rank test: Application
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $W >$ high critical value$_{\alpha/2}$ or $W <$ low critical value$_{\alpha/2}$
+
+We have $6 = 6$ and $0 = 0$ $\Rightarrow$ we do \textit{not} reject the $H_0$
+
+
+## Two-sample Wilcoxon signed rank test: Application
+
+\blue{Draw conclusions}
+
+Using ```R``` we obtain the p-value from the exact distribution:
+
+$p-value = 2 * Pr(W<=0):$\
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * psignrank(q = 0, n = 3)
+```
+
+or 
+
+$p-value = 2 * Pr(W >= 6) = 2 * (1 - Pr(W < 6)):$
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * (1 - psignrank(q = 6 - 1, n = 3, lower.tail = TRUE))
+2 * psignrank(q = 6 - 1, n = 3, lower.tail = FALSE)
+```
+

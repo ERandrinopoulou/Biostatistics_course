@@ -1,0 +1,229 @@
+---
+title: "Biostatistics I: Statistical tests for categorical data"
+subtitle: ""
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation:
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+
+ 
+## $z$-test for proportions
+
+\blue{One-sample }
+
+Is the probability of being diagnosed with asthma now different than it
+was 50 years ago?
+
+\blue{Two-sample}
+
+Is the probability of being diagnosed with asthma in the Netherlands
+different than in Belgium?
+
+
+
+## One sample $z$-test for proportions: Theory   
+
+\blue{Scenario} 
+
+Is the probability of being diagnosed with asthma now different than it was 50 years ago?
+
+\blue{Hypothesis}
+
+$H_0: \pi = \pi_0$\newline
+$H_1: \pi \neq \pi_0$
+
+
+
+## One sample $z$-test for proportions: Theory   
+
+\blue{Hypothesis}
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+If \textbf{one-tailed}\newline
+Is the probability of being diagnosed with asthma now higher than it was 50 years ago?\newline
+$H_0:\pi=\pi_0$\newline
+$H_1:\pi>\pi_0$\newline
+\newline
+or\newline
+\newline
+Is the probability of being diagnosed with asthma now lower than it was 50 years ago?\newline
+$H_0:\pi=\pi_0$\newline
+$H_1:\pi<\pi_0$
+}
+
+\end{tcolorbox}
+
+
+## One sample $z$-test for proportions: Theory  
+
+\blue{Test statistic}
+
+For large sample sizes, the distribution of the test statistic is approximately normal
+
+$z = \frac{p-\pi_0}{\sqrt{\frac{\pi_0(1-\pi_0)}{n}}}$
+
+- Sample proportion: $p$
+- Population proportion: $\pi_0$
+- Number of subjects: $n$
+
+
+If continuity correction is applied: $z = \frac{p-\pi_0 + c}{\sqrt{\frac{\pi_0(1-\pi_0)}{n}}}$, \
+
+where\
+
+- $c = -\frac{1}{2n}$ if $p > \pi_0$
+- $c = \frac{1}{2n}$ if $p < \pi_0$
+- $c =0$ if $|p-\pi_0| < \frac{1}{2n}$
+
+
+## One sample $z$-test for proportions: Theory  
+
+\blue{Sampling distribution}
+
+- $z$-distribution 
+- Critical values and p-value
+
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($z$) with the critical values$_{\alpha/2}$ or the p-value with $\alpha$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}: Compare test statistic with the critical value$_{\alpha}$
+
+}
+
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Bionomial test
+
+\blue{One-sample}
+
+Is the probability of being diagnosed with asthma now different than it
+was 50 years ago?
+
+* If the normal distribution cannot be used, then we need to use the binomial distribution
+
+
+
+
+
+
+
+
+
+
+
+## Chi-square test
+
+The chi-square test tests the statistical significance of the observed relationship with respect to the expected relationship
+
+* Two variables are related or independent
+* Goodness-of-fit between observed distribution and theoretical distribution of frequencies
+
+
+
+
+
+
+## Fisher's Exact Test
+
+\begin{itemize}
+\item Fisher’s exact test is an exact test 
+\item Fisher’s exact test is a special case of \textbf{\textcolor{EMC60}{permutation}} tests
+
+\begin{tcolorbox}[colback=EMC60,
+                  colframe=EMC60,
+                  width=13cm
+                 ]
+
+\begin{itemize}
+{\color{white} 
+\item Calculate the original test statistic
+\item Shuffle (permute) the data and calculate the test statistic
+\item Repeat the above step for every possible permutation of the sample
+\item Calculate the fraction of the values of the test statistic that are as extreme or more to the original test statistic
+}
+\end{itemize} 
+
+\end{tcolorbox}
+
+\end{itemize}
+ 
+ 
+## Fisher's Exact Test: Theory   
+
+\blue{Advantages/Disadvantages}
+
+- The advantage is that permutation tests exist for any test statistic, regardless the distribution. 
+- The disadvantage of this type of tests is that it can become computationally very intensive
+
+\blue{Assumptions}
+
+- Both row and column marginal totals are fixed in advance
+
+

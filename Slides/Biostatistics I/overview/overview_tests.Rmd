@@ -1,0 +1,249 @@
+---
+title: "Biostatistics I: Statistical tests for continuous data"
+subtitle: ""
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation:
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+
+ 
+## One-sample test 
+
+\blue{Parametric}
+
+* One-sample t-test 
+
+Is the mean BMI of the students in my university different from the
+mean BMI of all students?
+
+\blue{Non-parametric}
+
+* One-sample Wilcoxon signed rank test
+
+Is the median score value of the students in my university different from
+the median score value of all students?
+
+
+## One-sample t-test: Theory 
+
+\blue{Scenario} 
+
+Is the mean BMI of the students in my university different from the mean BMI of all students?
+
+
+\blue{Connection with linear regression}
+
+$y_i = \beta_0 + \beta_1x_i + \epsilon_i$, where $x_i = 0$
+\newline\newline
+$H_0: \beta_0 = 0$\newline
+$H_1: \beta_0 \neq 0$
+
+
+## One-sample t-test
+
+\blue{Scenario} 
+
+Is the mean BMI of the students in my university different from the mean BMI of all students?
+
+
+\blue{Alternatively}
+
+$H_0: \mu = 0$\newline
+$H_1: \mu \neq 0$
+
+\blue{More general}
+
+$H_0: \mu = \mu_0$\newline
+$H_1: \mu \neq \mu_0$
+
+
+
+## One-sample t-test 
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+If \textbf{one-tailed}
+\newline\newline
+Is the mean BMI of the students in my university larger than the mean BMI of all students?\newline
+$H_0: \mu = \mu_0$\newline
+$H_1: \mu > \mu_0$\newline
+\newline
+or\newline
+\newline
+Is the mean BMI of the students in my university smaller than the mean BMI of all students?\newline
+$H_0: \mu = \mu_0$\newline
+$H_1: \mu < \mu_0$
+}
+\end{tcolorbox}
+
+
+
+## One-sample t-test  
+
+\blue{Test statistic}
+
+$t = \frac{\bar{x} - \mu_0}{sd(x)/\sqrt{n}}$
+
+- Sample mean: $\bar{x}$ (sample of students in my university) 
+- Population mean: $\mu_0$ (all students) 
+- Standard deviation of the sample: $sd(x)$  
+- Number of subjects: $n$ 
+
+\blue{Sampling distribution}
+
+- $t$-distribution with $df = n - 1$ 
+- Critical values and p-value
+
+
+
+## One-sample t-test
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($t$) with the critical values$_{\alpha/2}$ or the p-value with $\alpha$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}: Compare test statistic with the critical value$_{\alpha}$
+
+}
+
+\end{tcolorbox}
+
+
+
+
+ 
+## Two-sample test (independent samples)  
+
+\blue{Parametric}
+
+* Two-sample t-test (independent samples) 
+
+Is the mean BMI of the students from group 1 different from the mean
+BMI of the students of group 2?
+
+\blue{Non-parametric}
+
+* Two-sample Wilcoxon rank sum test
+
+Is the distribution of the score values of the students in group 1 different
+from the distribution of the score values of the students in group 2?
+
+\blue{Connection with linear regression!}
+
+
+
+
+ 
+## Two-sample test (dependent samples)
+
+\blue{Parametric}
+
+* Two-sample t-test (dependent samples)
+
+Is the mean BMI of the students before the exams different from the
+mean BMI of the students after the exams?
+
+\blue{Non-parametric}
+
+* Two-sample Wilcoxon signed rank test
+
+Is the median score value of the students in my university different this
+year compared to next year?
+
+\blue{Connection with linear regression!}
+
+
+
+
+
+ 
+## M-sample test 
+
+\blue{Parametric}
+
+* Analysis of variance / F-test
+
+Is the mean BMI of the students different in groups 1, 2 and 3?
+
+\blue{Non-parametric}
+
+* M-sample Kruskal-Wallis test
+
+Is the distribution of the score values of the students different in groups
+1, 2 and 3?
+
+\blue{Connection with linear regression!}
+
+
+
+
+ 
+## Correlation test 
+
+\blue{Parametric}
+
+* Pearson correlation test
+
+Is the height of the students in my university linearly associated with
+their weight?
+
+\blue{Non-parametric}
+
+* Spearman correlation test
+
+Is the height of the students in my university monotonically associated
+with their weight?
+
+\blue{Connection with linear regression!}

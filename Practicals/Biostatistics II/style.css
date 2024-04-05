@@ -1,0 +1,51 @@
+h1, .h1 {
+    color: #0c2074;
+}
+
+h2, .h2 {
+    margin-top: 80px;
+    color: #6d79ac;
+}
+
+h3, .h3 {
+    color: #6d79ac;
+}
+
+
+.gist {
+   overflow:auto;
+}
+
+.gist .blob-wrapper.data {
+   max-height:300px;
+   overflow:auto;
+}
+
+
+#header .btn-group {
+    display: none;
+}
+
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    background-color: #0c2074;
+}
+.nav>li>a {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+    color: #0c2074;
+}
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {
+    color: #ffffff;
+    background-color: #0c2074;
+}
+.btn-info {
+  border-color: #ffffff !important;
+  background: #6d79ac !important;
+  color: #ffffff !important
+}
+.btn-info, .btn-info:hover, .btn-info:active, .btn-info:visited {
+  border-color: #ffffff !important;
+  background: #6d79ac !important;
+  color: #ffffff !important;
+}

@@ -1,0 +1,856 @@
+---
+title: "Biostatistics I: Hypothesis testing"
+subtitle: "Continuous data: One-sample tests"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+
+* One-sample t-test
+
+* One-sample Wilcoxon signed rank test 
+
+* Examples
+
+
+ 
+## One-sample t-test: Theory   
+
+\blue{Assumptions}
+
+* The dependent variable must be continuous
+* The observations are independent
+* The dependent variable is approximately normally distributed
+* The dependent variable does not contain any outliers
+
+
+## One-sample t-test: Theory 
+
+\blue{Scenario} 
+
+Is the mean BMI of the students in my university different from the mean BMI of all students?
+
+```{r samples, include = TRUE, cache = TRUE, warning = FALSE, eval = TRUE, fig.height=2.5, fig.width=3.5, dpi=272, dev='png'}
+x <- rnorm(50, 20, 5)
+id <- c(1:50)
+dat <- data.frame(id = id, x = x)
+
+library(ggplot2)
+library(ggimage)
+
+df_img <- data.frame(phase = c("Clipart"),
+                     image = c("clipart.png"))
+df_img$phase <- factor(df_img$phase, levels=df_img$phase)
+ggplot(dat, aes(x = id, y = x)) +
+  geom_image(aes(image = df_img$image), size = 0.02, col = "white") +
+  geom_hline(yintercept = 20, col = "#5379aa", lwd = 2) +
+  labs(x = "", y = "BMI") +
+   annotate(geom = "text", x = -8, y = 21, 
+           label = expression(paste(mu[0],)),
+              color = "white", cex = 4.5) +
+  theme(axis.text.x = element_blank(),
+        panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks = element_blank())
+```
+
+
+## One-sample t-test: Theory 
+
+\blue{Scenario} 
+
+Is the mean BMI of the students in my university different from the mean BMI of all students?
+
+
+\blue{Connection with linear regression}
+
+$y_i = \beta_0 + \beta_1x_i + \epsilon_i$, where $x_i = 0$
+\newline\newline
+$H_0: \beta_0 = 0$\newline
+$H_1: \beta_0 \neq 0$
+
+
+
+## One-sample t-test: Theory 
+
+\blue{Scenario} 
+
+Is the mean BMI of the students in my university different from the mean BMI of all students?
+
+
+\blue{Alternatively}
+
+$H_0: \mu = 0$\newline
+$H_1: \mu \neq 0$
+
+\blue{More general}
+
+$H_0: \mu = \mu_0$\newline
+$H_1: \mu \neq \mu_0$
+
+
+
+## One-sample t-test: Theory  
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+If \textbf{one-tailed}
+\newline\newline
+Is the mean BMI of the students in my university larger than the mean BMI of all students?\newline
+$H_0: \mu = \mu_0$\newline
+$H_1: \mu > \mu_0$\newline
+\newline
+or\newline
+\newline
+Is the mean BMI of the students in my university smaller than the mean BMI of all students?\newline
+$H_0: \mu = \mu_0$\newline
+$H_1: \mu < \mu_0$
+}
+\end{tcolorbox}
+
+
+
+## One-sample t-test: Theory  
+
+\blue{Test statistic}
+
+$t = \frac{\bar{x} - \mu_0}{sd(x)/\sqrt{n}}$
+
+- Sample mean: $\bar{x}$ (sample of students in my university) 
+- Population mean: $\mu_0$ (all students) 
+- Standard deviation of the sample: $sd(x)$  
+- Number of subjects: $n$ 
+
+\blue{Sampling distribution}
+
+- $t$-distribution with $df = n - 1$ 
+- Critical values and p-value
+
+
+
+## One-sample t-test: Theory  
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($t$) with the critical values$_{\alpha/2}$ or the p-value with $\alpha$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}: Compare test statistic with the critical value$_{\alpha}$
+
+}
+
+\end{tcolorbox}
+
+
+## One-sample t-test: Application
+
+\blue{Scenario} 
+
+Is the mean BMI of the students in my university different from the mean BMI of all students?
+
+\blue{Hypothesis}
+
+$H_0: \mu = \mu_0$\newline
+$H_1: \mu \neq \mu_0$
+
+
+## One-sample t-test: Application
+
+\blue{Collect and visualize data}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+set.seed(2021+2)
+BMI <- rnorm(50, 24, 6)
+id <- 1:50
+df <- data.frame(id, BMI)
+
+ggplot(df, aes(x=BMI)) + 
+  geom_histogram(bins = 6, fill = rgb(0.6769,0.4447,0.7114)) +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+
+
+## One-sample t-test: Application
+
+\begincols
+  \begincol{0.6\linewidth}
+
+\blue{Hypothesis}
+
+$H_0: \mu = \mu_0$\newline
+$H_1: \mu \neq \mu_0$\newline
+
+\blue{Test statistic}
+
+Let's assume that:
+
+- Sample mean $\bar{x} = 24$
+- Mean of all students $\mu_0 = 20$ 
+- Standard deviation of the sample $sd(x) = 6$
+- Number of subjects $n = 50$ 
+ 
+$t = \frac{\bar{x} - \mu_0}{sd(x)/\sqrt{n}} = \frac{24-20}{6/\sqrt{50}} = 4.7$
+
+ \endcol
+\begincol{0.4\linewidth}
+
+\vspace*{-3.5cm}
+
+\blue{Degrees of freedom}
+
+$df = 50 - 1 = 49$\newline
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+ \endcol
+\endcols
+
+## One-sample t-test: Application
+
+\begincols
+  \begincol{0.6\linewidth}
+
+\blue{Critical values}
+
+Using ```R``` we get the critical values from the $t$-distribution:\newline
+critical value$_{\alpha/2}$ = critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qt(p = 0.05/2, 49, lower.tail = FALSE)
+```
+
+-critical value$_{\alpha/2}$ = -critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qt(p = 0.05/2, 49, lower.tail = TRUE)
+```
+
+ \endcol
+\begincol{0.4\linewidth}
+
+\textcolor{white}{texttestestesstdfgzdfgdfgdfgdsdfg}
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = 2, xend = 2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),       
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[2]), limits = c(-3.5,3.5),
+                     labels=c("2.01"))
+```
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = -2, xend = -2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1]), limits = c(-3.5,3.5),
+                     labels=c("-2.01"))
+```
+
+ \endcol
+\endcols
+
+
+## One-sample t-test: Application
+
+\blue{Critical values}
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}
+\newline\newline
+critical value$_{\alpha}$:\newline
+\texttt{qt(p = 0.05, df, lower.tail = FALSE)}
+ \newline\newline
+or\newline
+ \newline
+-critical value$_{\alpha}$: \newline
+\texttt{qt(p = 0.05, df, lower.tail = TRUE)}
+
+}
+
+\end{tcolorbox}
+
+
+
+## One-sample t-test: Application
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $t$ > critical value$_{\alpha/2}$ or $t$ < - critical value$_{\alpha/2}$
+
+We have 4.7 > 2.01 $\Rightarrow$ we reject the $H_0$
+\newline\newline
+Using ```R``` we obtain the p-value from the $t$-distribution:
+
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * pt(q = 4.7, df = 49, lower.tail = FALSE)
+```
+
+
+##  One-sample t-test: Application
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 2.95 * SD, mu + 2.95 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, -30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = ">99%",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -3, y = 0.01, label = "<0.0001%",
+              color = "white", cex = 3) +
+  annotate(geom = "text", x = 3, y = 0.01, label = "<0.0001%",
+              color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2]), limits = c(-3,3),
+                     labels=c("-4.7", "4.7"))
+```
+
+
+
+## One-sample t-test: Application
+
+\blue{Draw conclusions}
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}
+\newline\newline
+We reject the $H_0$ if: t > critical value$_\alpha$\newline
+Using \texttt{R} we obtain the p-value from the $t$-distribution: \newline
+\texttt{pt(q = t, df, lower.tail = FALSE)}
+ \newline\newline
+or\newline
+ \newline
+We reject the $H_0$ if: t < -critical value$_\alpha$ \newline
+Using \texttt{R} we obtain the p-value from the $t$-distribution:  \newline
+\texttt{pt(q = t, df, lower.tail = TRUE)}
+
+}
+
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+ 
+## One-sample Wilcoxon signed rank test: Theory   
+
+\blue{Assumptions}
+
+* Population distribution is symmetric
+* The observations are independent of one another
+
+
+## One-sample Wilcoxon signed rank test: Theory   
+
+* \blue{Scenario} 
+
+Is the median score value of the students in my university different from the median score value of all students?
+
+
+* \blue{Connection with linear regression}
+
+\begincols
+  \begincol{0.5\textwidth}
+
+\textit{What is signed rank??}\newline
+Ranks are integers indicating the rank of some values. 
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+rank(c(3, -10, 16, 6, 2))
+```
+
+\endcol
+\begincol{0.5\linewidth}
+
+For signed ranks we obtain the rank according to the absolute value and we add the sign.
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = "", out.width=3}
+sign(c(3, -10, 16, 6, 2)) *
+  rank(abs(c(3, -10, 16, 6, 2)))
+```
+
+
+ \endcol
+\endcols
+
+## One-sample Wilcoxon signed rank test: Theory   
+
+* \blue{Connection with linear regression}
+
+$signed\_rank(y_i) = \beta_0 + \beta_1x_i + \epsilon_i$, where $x_i = 0$
+
+$H_0: \beta_0 = 0$\
+$H_1: \beta_0 \neq 0$
+
+* \blue{Alternatively}
+
+$H_0: m = 0$\newline
+$H_1: m \neq 0$
+
+* \blue{More general}
+
+$H_0: m = m_0$\newline
+$H_1: m \neq m_0$
+
+
+## One-sample Wilcoxon signed rank test: Theory 
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+If \textbf{one-tailed}
+\newline\newline
+Is the median score value of the students in my university larger than the median score value of all students?\newline
+$H_0: m = m_0$\newline
+$H_1: m > m_0$\newline
+\newline
+or\newline
+\newline
+Is the median score value of the students in my university smaller than the median score value of all students?\newline
+$H_0: m = m_0$\newline
+$H_1: m < m_0$
+}
+
+\end{tcolorbox}
+
+
+## One-sample Wilcoxon signed rank test: Theory 
+
+\blue{Test statistic}
+
+- Calculate the ranks of the absolute difference
+    - If ties $\Rightarrow$ assign the average of the tied ranks
+    - If a pair of scores are equal $\Rightarrow$ they are dropped from the analysis and the sample size is reduced
+- Obtain the sum of those ranks where the difference was positive or negative $W_+ = \sum R_d^+$ or $W_- = \sum R_d^-$, where $R_d$ are the ranks of the differences
+- The test statistic ($W$) is the minimum of $W_+$ and $W_-$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+If \textbf{one-tailed}: use either $W_+$ or $W_-$ for the test statistic ($W$) depending on the direction of the alternative hypothesis 
+}
+\end{tcolorbox}
+
+## One-sample Wilcoxon signed rank test: Theory 
+
+\blue{Sampling distribution}
+
+- For large sample size, we use the normal approximation, that is, $W$ is normally distributed
+
+\vspace*{0.2cm}
+
+\begincols
+  \begincol{0.4\textwidth}
+
+$\mu_W = \frac{n(n+1)}{4}$ and $\sigma_W = \sqrt{\frac{n(n+1)(2n+1)}{24}}$
+
+$z = \frac{ \mid max(W_+, W_-) - \mu_W \mid - 1/2}{\sigma_W}$
+
+\endcol
+\begincol{0.5\linewidth}
+
+\scriptsize \textit{When there are ties, the mean stays the same but the variance is reduced by a quantity}
+
+ \endcol
+\endcols
+
+- For small sample size, we can use the exact distribution (more details in the application)
+
+
+Get critical values and p-value
+
+
+
+
+## One-sample Wilcoxon signed rank test: Theory 
+
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+
+\blue{Draw conclusions}
+
+- Compare test statistic with the critical values$_{\alpha/2}$ or the p-value with $\alpha$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}: Compare test statistic with the critical value$_{\alpha}$
+
+}
+
+\end{tcolorbox}
+
+
+## One-sample Wilcoxon signed rank test: Application
+
+\blue{Scenario} 
+
+Is the median score value of the students in my university different from the median score value of all students?
+
+\blue{Hypothesis}
+
+$H_0: m = m_0$\newline
+$H_1: m \neq m_0$
+
+
+## One-sample Wilcoxon signed rank test: Application
+
+\blue{Collect and visualize data}
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(2021)
+x <- rnorm(3, 10, 2)
+y = 10
+difference <- x - y
+rank_d <- NA
+rank_d1 <- rank(abs(difference[difference != 0]))
+rank_d[which(difference != 0)] <- rank_d1
+dat <- data.frame(x = x, y = y, difference = difference, 
+                  abs_diferences = abs(difference), rank_d = rank_d)
+colnames(dat) <- c("x", "m_0", "Difference", "|Difference|", "rank")
+
+library(knitr)
+kable(dat)
+```
+
+\vspace*{1cm}
+
+\begincols
+  \begincol{0.2\textwidth}
+  
+\blue{Hypothesis}
+
+$H_0: m = m_0$\newline
+$H_1: m \neq m_0$\newline
+
+\endcol
+\begincol{0.7\linewidth}
+
+\blue{Test statistic}
+
+$W_- = 1$ and $W_+ = 5$
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+ \endcol
+\endcols
+
+
+
+
+## One-sample Wilcoxon signed rank test: Application
+
+\blue{Exact distribution}
+
+\begin{small}
+If $n=3$ with no ties, we have $0, \dots, 6$ possible values for $W$. Each of the three data points would be assigned a rank of either $1, 2,$ or $3$. Depending on whether the data point fell above or below $m_0$, each of the three possible ranks $1, 2,$ or $3$ would remain either a positive signed rank or become a negative.
+\end{small}
+
+\vspace*{-0.2cm}
+
+\begincols
+  \begincol{0.5\textwidth}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+x <- c(1, -1, 1, 1, -1, -1, 1, -1)
+y <- c(2, 2, -2, 2, -2, 2, -2, -2)
+z <- c(3, 3, 3, -3, 3, -3, -3, -3)
+Wz <- c(6, 5, 4, 3, 3, 2, 1, 0) 
+Pr <- c(0.125, 0.125, 0.125, 0.25, 0.25, 0.125, 0.125, 0.125)
+dat <- data.frame(x = x, y = y, z = z, W = Wz, Pr = Pr)
+colnames(dat) <- c("", "", "", "W", "Probability")
+
+library(knitr)
+kable(dat)
+```
+
+\endcol
+\begincol{0.5\linewidth}
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=6cm
+                 ]
+{\color{white} 
+
+Summarize the probs:
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+Wz <- c(0:6) 
+Pr <- c(0.125, 0.125, 0.125, 0.25, 0.125, 0.125, 0.125)
+dat <- data.frame(W = Wz, Pr = Pr)
+colnames(dat) <- c("W", "Probability")
+
+library(knitr)
+kable(dat)
+```
+
+}
+
+\end{tcolorbox}
+
+ \endcol
+\endcols
+
+
+## One-sample Wilcoxon signed rank test: Application
+
+
+\begincols
+  \begincol{0.63\linewidth}
+  
+\blue{Critical values}
+
+Using ```R``` we get the critical values from the exact distribution:\newline
+low critical value$_{\alpha/2}$ = low critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qsignrank(p = 0.05/2, n = 3, lower.tail = TRUE)
+```
+
+high critical value$_{\alpha/2}$ = high critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qsignrank(p = 0.05/2, n = 3, lower.tail = FALSE)
+```
+
+
+ \endcol
+\begincol{0.35\linewidth}
+
+\textcolor{white}{texttestestesstdfgzdfgdfgdfgdsdfg}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=4, fig.width=4}
+x <- c(1, -1, 1, 1, -1, -1, 1, -1)
+y <- c(2, 2, -2, 2, -2, 2, -2, -2)
+z <- c(3, 3, 3, -3, 3, -3, -3, -3)
+Wz <- c(6, 5, 4, 3, 3, 2, 1, 0) 
+Pr <- c(0.125, 0.125, 0.125, 0.25, 0.25, 0.125, 0.125, 0.125)
+dat <- data.frame(x = x, y = y, z = z, W = Wz, Pr = Pr)
+
+barplot(table(dat$W), main = "Distribution of W")
+```
+
+ \endcol
+\endcols
+
+
+## One-sample Wilcoxon signed rank test: Application
+
+\blue{Critical values}
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}
+\newline\newline
+low critical value$_{\alpha}$:\newline
+\texttt{qsignrank(p = 0.05, n = n, lower.tail = TRUE)}
+ \newline\newline
+or\newline
+ \newline
+high critical value$_{\alpha}$: \newline
+\texttt{qsignrank(p = 0.05, n = n, lower.tail = FALSE)}
+
+}
+
+\end{tcolorbox}
+
+
+## One-sample Wilcoxon signed rank test: Application
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $W >$ high critical value$_{\alpha/2}$ or $W <$ low critical value$_{\alpha/2}$
+
+We have $5 < 6$ and $1 > 0$ $\Rightarrow$ we do \textit{not} reject the $H_0$
+
+
+## One-sample Wilcoxon signed rank test: Application
+
+\blue{Draw conclusions}
+
+Using ```R``` we obtain the p-value from the exact distribution:
+
+$p-value = 2 * Pr(W <= 1):$\
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * psignrank(q = 1, n = 3, lower.tail = TRUE)
+```
+
+or 
+
+$p-value = 2 * Pr(W >= 5) = 2 * (1 - Pr(W < 5)):$
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * (1 - psignrank(q = 5 - 1, n = 3, lower.tail = TRUE))
+2 * psignrank(q = 5 - 1, n = 3, lower.tail = FALSE)
+```
+
+
+
+
+
+## One-sample Wilcoxon signed rank test: Application
+
+\blue{Draw conclusions}
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}
+\newline\newline
+Using \texttt{R} we obtain the p-value from the exact distribution:\newline
+\texttt{psignrank(q = $W$, n = n, lower.tail = TRUE)}
+\newline\newline
+or\newline
+\newline
+Using \texttt{R} we obtain the p-value from the exact distribution:\newline
+\texttt{1 - psignrank(q = $W$ - 1, n = n, lower.tail = TRUE)}\newline
+or\newline
+\texttt{psignrank(q = $W$ - 1, n = n, lower.tail = FALSE)}
+
+}
+
+\end{tcolorbox}

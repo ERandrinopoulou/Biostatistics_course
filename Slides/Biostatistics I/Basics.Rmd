@@ -1,0 +1,383 @@
+---
+title: "Biostatistics I: Introduction to R"
+subtitle: "Basics"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+```{r setup, include=FALSE}
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+## In this Section
+
+* Using R
+
+* Examples with Data
+
+* Getting Familiar with R
+
+* Importing data and saving your work
+
+* A lot of practice
+
+
+## Using R
+
+* R is a command-based procedural language
+  - write and execute commands
+  - use and define functions
+  
+* You may write the commands in the R console (Windows) or in a shell (Linux)
+
+\vspace*{3ex}
+
+\blue{You will become more familiar with the syntax as you use it}
+
+
+## Using R  
+
+* Strongly advisable to use a suitable text editor - Some available options:
+  - RWinEdt (for Windows; you also need WinEdt installed)
+  - Tinn-R (for Windows; http://sciviews.org/Tinn-R/)
+  - Rkward (for Linux)
+  - Emacs (w. ESS, all platforms)
+  - Visual Studio (for Windows)
+  - Rstudio (all major platforms; http://www.rstudio.org/) 
+  - for more check https://r-dir.com/blog/2013/01/list-of-r-editors.html
+  
+  
+##  Using R  
+
+* For this course: Rstudio (http://www.rstudio.org/)
+  - free
+  - works fine in Windows, MacOS and Linux
+  - helpful with errors
+  - alternative output options
+  
+  
+##  Using R  
+
+* Can I use R without Rstudio?
+
+\vspace*{0.5cm}
+
+* Can I use Rstudio without R?
+
+
+## Practical Examples
+
+* **Package \texttt{\blue{survival}} - pbc data set**
+
+```{r example data, include=TRUE}
+dt <- as.data.frame(pbc[1:5,c(1:6,11,12)])
+kable(dt, "latex", booktabs = T, align = "c") %>%
+ kable_styling(full_width = F) 
+```
+
+
+## Practical Examples  
+
+* \textbf{\textcolor{red}{id}}:	case number
+* \textbf{\textcolor{red}{time}}:	number of days between registration and the earlier of death, transplantation, or study analysis in July, 1986
+* \textbf{\textcolor{red}{status}}:	status at endpoint, 0/1/2 for censored, transplant, dead
+* \textbf{\textcolor{red}{trt}}:	1/2/NA for D-penicillamine, placebo, not randomised
+* \textbf{\textcolor{red}{age}}:	in years
+* \textbf{\textcolor{red}{sex}}:	m/f
+* \textbf{\textcolor{red}{bili}}:	serum bilirunbin (mg/dl)
+* \textbf{\textcolor{red}{chol}}:	serum cholesterol (mg/dl)
+
+More details: https://stat.ethz.ch/R-manual/R-devel/library/survival/html/pbc.html
+
+
+## Practical Examples  
+
+* What is a \blue{scalar}/vector/matrix
+
+```{r example data b, include=TRUE}
+dt <- as.data.frame(pbc[1:5, c(1:6,11,12)])
+dt <- format(dt, digits = 7)
+dt %>%
+ mutate(
+   dt = row.names(.),
+   age = cell_spec(age, "latex", color = ifelse(age >= 70, "red", "black"), 
+                   bold = ifelse(age >= 70, "TRUE", "FALSE"), align = c("c", rep("c", 4))),
+   time = cell_spec(time, "latex", align = c("c", rep("c", 4))),
+   id = cell_spec(id, "latex", align = c("c", rep("c", 4))),
+   sex = cell_spec(sex, "latex", align = c("c", rep("c", 4))),
+   status = cell_spec(status, "latex", align = c("c", rep("c", 4))),
+   trt = cell_spec(trt, "latex", align = c("c", rep("c", 4))),
+   bili = cell_spec(bili, "latex", align = c("c", rep("c", 4))),
+   chol = cell_spec(chol, "latex", align = c("c", rep("c", 4))),
+   )%>%
+#select(c(id, time, status, trt, age, sex, bili, chol)) %>%
+kable("latex", escape = F, booktabs = T, align = "c")  %>%
+kable_styling(position = "center", full_width = F)
+```
+
+
+## Practical Examples  
+
+* What is a scalar/\blue{vector}/matrix
+
+```{r example data c, include=TRUE}
+dt <- as.data.frame(pbc[1:5,c(1:6,11,12)])
+kable(dt, "latex", booktabs = T, align = "c") %>%
+ kable_styling(full_width = F) %>%
+ column_spec(3, bold = TRUE, color = "red")
+```
+
+
+## Practical Examples  
+
+* What is a scalar/\blue{vector}/matrix
+
+```{r example data d, include=TRUE}
+dt <- as.data.frame(pbc[1:5,c(1:6,11,12)])
+kable(dt, "latex", booktabs = T, align = "c") %>%
+ kable_styling(full_width = F) %>%
+ column_spec(2, bold = TRUE, color = "red")
+```
+
+
+## Practical Examples  
+
+* What is a scalar/vector/\blue{matrix}
+
+```{r example data e, include=TRUE}
+dt <- as.data.frame(pbc[1:5,c(1:6,11,12)])
+kable(dt, "latex", booktabs = T, align = "c") %>%
+ kable_styling(full_width = F) %>%
+ column_spec(2:3, bold = TRUE, color = "red")
+```
+
+
+## Practical Examples  
+
+* What is a scalar/vector/\blue{matrix}
+
+```{r example data f, include=TRUE}
+dt <- as.data.frame(pbc[1:5,c(1:6,11,12)])
+kable(dt, "latex", booktabs = T, align = "c") %>%
+ kable_styling(full_width = F) %>%
+ column_spec(7:8, bold = TRUE, color = "red")
+```
+
+
+## Practical Examples  
+
+* Common questions
+   - What is the average age?
+   - What is the average serum bilirubin?
+   - What is the average serum cholesterol?
+   - What is the percentage of females?
+   - How many missing values do we have for serum cholesterol?
+
+\vspace*{0.3cm}
+
+\blue{All these questions can be answered using R!}
+
+
+## Getting Familiar with R
+
+* Elementary commands: \textbf{\textcolor{red}{expressions}} and \textbf{\blue{assignments}}
+
+* An \textbf{\textcolor{red}{expression}} given as command is evaluated printed and discarded
+
+* An \textbf{\blue{assignment}} evaluates an expression and passes the value to a variable - the result is not automatically printed
+
+
+## Getting Familiar with R  
+
+Expression is given as a command,
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+103473
+```
+
+\vspace*{3ex}
+
+ - However, it cannot be viewed again unless the command is rerun.
+ 
+\pause
+ 
+\vspace*{3ex}
+
+ In order to store information, the expression should assign the command
+ 
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+x <- 103473
+x
+```
+
+
+## Getting Familiar with R  
+
+\blue{You can use R as a calculator!}
+
+* Basic arithmetics
+ ```{r, eval = FALSE, include = TRUE, echo = TRUE}
++, -, *, /, ^
+```
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+y <- 103473 + 100000
+y
+```
+
+* Complicated arithmetics
+
+
+## Getting Familiar with R  
+
+\blue{Tips:}
+
+* R is case sensitive, e.g.,
+  - \textbf{\blue{"sex"}} is different than \textbf{\blue{"Sex"}}
+* Commands are separated by a semi-colon or by a newline
+* Comments can be put anywhere, starting with a hashmark \textbf{\blue{\#}}: everything to the end of the line is a comment
+* Assign a value to an object by \textbf{\blue{<-}} or \textbf{\blue{=}}
+* Working directory: get with \textbf{\blue{getwd()}} and set with \textbf{\blue{setwd()}} 
+
+
+## Getting Familiar with R  
+
+* Missing values
+  - are coded as \textbf{\blue{NA}} (i.e., not available) \textbf{\blue{is.na()}}
+* Infinity
+  - is coded as \textbf{\blue{Inf}} (plus infinity) or \textbf{\blue{-Inf}} (minus infinity) \textbf{\blue{is.finite()}}
+* The Null objects
+  - are coded as \textbf{\blue{NULL}} (undefined) \textbf{\blue{is.null()}}
+* Not a number
+  - is coded as \textbf{\blue{NaN}} (Not a Number). Example: 
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+0/0
+```
+
+
+## Importing Data 
+
+
+* function: \textbf{\blue{read.table()}}, \textbf{\blue{read.csv()}} and its variants
+  - note: use forward slashes or double backward slashes in the file names, e.g., \
+    "`C:/Documents and Settings/User/Data/file.txt`" or \
+    "`C:\\Documents and Settings\\User\\Data\\file.txt`"
+    
+\vspace*{3ex}    
+    
+* Specialized functions for importing data from other programs
+  - package: \textbf{\blue{foreign}}, function: \textbf{\blue{read.spss()}}, \textbf{\blue{read.dta()}}
+  - package: \textbf{\blue{Hmisc}}, function: \textbf{\blue{sas.get()}}
+  - package: \textbf{\blue{openxlsx}}, function: \textbf{\blue{read.xlsx()}}  
+  - package: \textbf{\blue{readxl}}, function: \textbf{\blue{read\_excel()}}
+  - package: \textbf{\blue{haven}}, function: \textbf{\blue{read\_spss()}}
+  - \textit{etc}
+
+
+## Exporting Data 
+
+* Specialized functions for exporting data to other programs
+  - function: \textbf{\blue{write.table()}}, \textbf{\blue{write.csv()}}
+  - package: \textbf{\blue{foreign}}, function: \textbf{\blue{write.spss()}}, \textbf{\blue{write.dta()}}
+  - package: \textbf{\blue{openxlsx}}, function: \textbf{\blue{write.xlsx()}}
+  - \textit{etc}
+
+
+## Saving and Loading your Work  
+
+\textit{\textbf{\blue{Multiple objects:}}}
+
+* You can save your R objects using \textbf{\blue{save()}}
+  - be careful about overwriting 
+* You can load your saved R objects using \textbf{\blue{load()}}
+
+  
+\textit{\textbf{\blue{Single object:}}}
+
+* Using \textbf{\blue{saveRDS()}} you can save a single R object 
+* Using \textbf{\blue{readRDS()}} you can load a single R object
+  - we will need an assignment statement to store the results
+
+\vspace*{0.7cm}
+
+\textbf{\blue{Save your code by using the tab File in Rstudio!}}
+  
+  
+## Saving and Loading your Work  
+
+\textbf{\blue{Tips:}}
+
+* Short names are preferred over longer names
+* Try to avoid using names that contain symbols
+* Avoid spaces in names
+* Remove any comments in your data set
+* Make sure that any missing values in your data set are indicated with the same value (or no value)
+
+
+
+
+
+## Summary
+
+\begin{columns}[onlytextwidth,T]
+\begin{column}{0.30\linewidth}
+
+
+\blue{Basic functions}
+\begin{itemize}
+\item \texttt{getwd()}, \texttt{setwd()}, 
+\item \texttt{is.na()}, \texttt{is.finite()}, \texttt{is.null()}
+\end{itemize}
+
+\end{column}
+
+\begin{column}{0.58\linewidth}
+
+
+\blue{Import/Export}
+\begin{itemize}
+\item \texttt{read.csv()}, \texttt{write.csv()}
+\item \texttt{read.xlsx()}, \texttt{write.xlsx()}
+\item \texttt{read.table()}, \texttt{write.table()}
+\end{itemize}
+
+\bigskip
+
+\blue{Save/Load}
+\begin{itemize}
+\item \texttt{save()}, \texttt{saveRDS()}
+\item \texttt{load()}, \texttt{readRDS()}
+\end{itemize}
+
+
+\end{column}
+
+
+\end{columns}
+
+

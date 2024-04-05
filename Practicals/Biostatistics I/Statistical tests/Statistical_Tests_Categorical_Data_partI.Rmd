@@ -1,0 +1,522 @@
+---
+title: 'Statistical Tests for Categorical Data (part I)'
+output: 
+  html_document:
+    code_folding: show 
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: false
+    theme: spacelab
+    highlight: tango
+    includes:
+      after_body: ../footerEA.html
+    css: ../style.css
+---
+
+
+```{r setup, include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+
+```{r, echo = FALSE, purl = FALSE}
+knitr::knit_hooks$set(purl = knitr::hook_purl)
+
+options(purl = FALSE)
+
+knitr::opts_chunk$set(purl = FALSE)
+```
+
+```{r, include = FALSE}
+knitr::opts_hooks$set(eval = function(opt) {
+  if (any(opt$exercise))
+    opt$eval <- opt$include <- FALSE
+  
+  opt
+})
+
+
+static <- TRUE
+
+options(width = 100)
+
+```
+
+
+```{r packages, include = FALSE}
+library(kableExtra)
+library(knitr)
+```
+
+
+```{r load_data, context="data", include=FALSE}
+library(survival)
+```
+
+
+## Preface {data-progressive=FALSE}
+
+Open Rstudio to do the practicals. Note that tasks with * are optional.
+
+### R Packages
+
+In this practical, a number of R packages are used.
+The packages used (with versions that were used to generate the solutions) are:
+
+* `memisc` (version: `r packageVersion("memisc")`)
+* `MASS` (version: `r packageVersion("MASS")`)
+
+_`r R.version.string`_
+
+### One sample tests {.tabset .tabset-fade .tabset-pills}
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`. 
+
+* What is the proportion of each `Species` group?
+* We want to investigate whether the proportion of the group `setosa` is different from 0.5. Define the null and alternative hypothesis.
+* Perform the test and save the results in an object called test_res_cat. What is the conclusion?
+* Calculate the test statistic manually and confirm the result with the R function.
+* Investigate whether the proportion of the group `setosa` is smaller than 0.5.
+
+
+```{r onesample1_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1">Hint</button>
+<div id = "onesample1" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function percent(...) from the memisc package to obtain the percentages. 
+</div>')
+```
+
+
+```{r onesample1a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1a">Hint</button>
+<div id = "onesample1a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Rule of thumb: $150*0.3333$ and $150*(1-0.3333)$ are large so we can use the normal approximation. 
+</div>')
+```
+
+
+```{r onesample1b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1b">Hint</button>
+<div id = "onesample1b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the function prop.test() to investigate whether the sample proportion is different from a particular value.
+</div>')
+```
+
+
+
+```{r onesample1bb_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1bb">Hint</button>
+<div id = "onesample1bb" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+The prop.test() function presents the X-squared test statistic. To calculate the test statistic manually, use the connection between the X-squared and normal distribution.
+</div>')
+```
+
+```{r onesample1c_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1c">Hint</button>
+<div id = "onesample1c" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Check the argument alternative of the prop.test(...) function.
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r onesample1-solution, solution = TRUE}
+library(memisc)
+percent(iris$Species)
+
+# obtain the number of subjects in each group
+table(iris$Species)
+```
+
+The proportion of each species is (50/150=) 0.33.
+
+Null hypothesis: the probability of the group setosa is equal to 0.5.\
+Alternative hypothesis: the probability of the group setosa is different from 0.5.
+
+Rule of thumb: $150∗0.3333$ and $150∗(1−0.3333)$ are large so we can use the normal approximation.
+
+```{r onesample1-solutionb, solution = TRUE}
+# Without continuity correction
+test_res_cat <- prop.test(x = 50, n = 150, p = 0.5, alternative = "two.sided", correct = FALSE)
+test_res_cat
+
+# With continuity correction
+test_res_cat <- prop.test(x = 50, n = 150, p = 0.5, alternative = "two.sided", correct = TRUE)
+test_res_cat
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we can reject the null hypothesis that the proportion sample of the setona group is equal to 0.5.
+
+
+The test statistic (without continuity correction) is: $z=\frac{p-\pi_0}{\sqrt{\frac{\pi_0(1-\pi_0)}{n}}}$
+
+The test statistic (with continuity correction) is: $z=\frac{p-\pi_0 + c}{\sqrt{\frac{\pi_0(1-\pi_0)}{n}}}$,\
+where\
+
+- $c = -\frac{1}{2n}$ if $p > \pi_0$
+- $c = \frac{1}{2n}$ if $p < \pi_0$
+- $c = 0$ if $\mid p - \pi_0 \mid < \frac{1}{2n}$\
+
+and\
+
+- $p = 0.33$
+- $\pi_0 = 0.5$
+- $n = 150$
+
+
+**Connection between normal and X-squared distribution**:
+If $X_1, X_2, \dots, X_k$ are independent random variables from the 
+standard normal distribution, then the random variable
+$Q = X^2_1+X^2_2+ \dots +X^2_k$ follows the $\chi^2$ distribution with $k$
+degrees of freedom. The prop.test() function presents the X-squared test statistic. Therefore, we take $z^2$.
+
+
+```{r onesample1-solutionc, solution = TRUE}
+# Without continuity correction
+# Calculate the test statistic manually
+z <- (0.33333 - 0.5) / sqrt((0.5*0.5)/(150))
+z^2
+
+# With continuity correction
+# Calculate the test statistic manually
+z <- (0.33333 - 0.5 + 1/300) / sqrt((0.5*0.5)/(150))
+z^2
+```
+
+
+```{r onesample1-solutiond, solution = TRUE}
+prop.test(x = 50, n = 150, p = 0.5, alternative = "less")
+```
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`. 
+
+* Investigate whether the proportion of the group `setosa` is different from 0.5 using the exact test.
+* Investigate whether the proportion of the group `setosa` is smaller than 0.5 using the exact test. Obtain the p-value manually and confirm the result with the function.
+
+
+```{r onesample2_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample2">Hint</button>
+<div id = "onesample2" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the function biom.test(...) to investigate whether the sample proportion is different from a particular value using the exact test.
+</div>')
+```
+
+```{r onesample2b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample2b">Hint</button>
+<div id = "onesample2b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+The binomial distribution model deals with finding the probability of 
+success of an event which has only two possible outcomes in a series of 
+experiments. For any possible outcome of the binomial we obtain the corresponding probability. We can calculate the p-value (without using the biom.test() R function) by considering the probability of seeing an outcome as, or more, extreme.
+</div>')
+```
+
+```{r onesample2c_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample2c">Hint</button>
+<div id = "onesample2c" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+We can calculate the p-value (without using the biom.test() R function) using the pbinom() or sum(dbinom()) R functions.
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2\\n")
+```
+
+```{r onesample2-solution, solution = TRUE}
+binom.test(x = 50, n = 150, p = 0.5, alternative = "two.sided")
+```
+
+For a one-tailed test, $H_1:\pi<\pi_0$
+$p-value = \Pr(X = 0) + \dots + Pr(X = k) = \sum_{i=0}^{k}Pr(X = i) = \sum_{i=0}^{k} ({n \atop i}) p^i (1-p)^{n-i}$,\
+
+where $k=50$, $n=150$ and $p=0.5$:
+
+```{r onesample2-solutionb, solution = TRUE}
+pbinom(q = 50, size = 150, prob = 0.5)
+
+# or
+
+sum(dbinom(x = 1:50, size = 150, prob = 0.5))
+
+test_res3 <- binom.test(x = 50, n = 150, p = 0.5, alternative = "less")
+test_res3$p.value
+```
+
+
+
+
+
+### Two sample tests {.tabset .tabset-fade .tabset-pills}
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Let's assume that we want to investigate whether there is a difference in the probability of lung cancer between males and females. We have:
+
+a) number of females: 100\
+b) number of males: 70\
+c) number of females with lung cancer: 50\
+d) number of males with lung cancer: 55
+
+* Define the null and alternative hypothesis.
+* Perform the test. What is the conclusion?
+* Calculate the test statistic manually.
+
+
+```{r twosample1a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample1a">Hint</button>
+<div id = "twosample1a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Rule of thumb: $100*50/100$, $100*(1-50/100)$, $70*55/70$ and $70*(1-55/70)$ are large so we can use the normal approximation. 
+</div>')
+```
+
+```{r twosample1b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample1b">Hint</button>
+<div id = "twosample1b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function prop.test() to investigate whether the proportions of the two groups are different.
+</div>')
+```
+
+```{r twosample1c_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample1c">Hint</button>
+<div id = "twosample1c" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+
+To calculate the test statistic manually, use the connection between the X-squared and normal distribution.
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+Null hypothesis: the probability of lung cancer in males is equal to females.\
+Alternative hypothesis: the probability of lung cancer in males is different from females.
+
+Rule of thumb: $100*50/100$, $100*(1-50/100)$, $70*55/70$ and $70*(1-55/70)$ are large so we can use the normal approximation.
+
+```{r twosample1-solution, solution = TRUE}
+prop.test(x = c(50, 55), n = c(100, 70), alternative = "two.sided")
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we can reject the null hypothesis that the sample probabilities are the same.
+
+Test statistic (with continuity correction) of pooled version:
+
+$z = \frac{(p_1-p_2) + \frac{F}{2}\big(\frac{1}{n_1} + \frac{1}{n_2}\big)}{\sqrt{ p(1-p) \big(\frac{1}{n_1} + \frac{1}{n_2} \big)}}$,\
+where\
+
+- $F = -1$ if $p_1 > p_2$
+- $F = 1$ if $p_1 < p_2$
+- $p = \frac{n_1p_1 + n_2p_2}{n_1 + n_2}$
+
+**Connection between normal and X-squared distribution**:
+If $X_1, X_2, \dots, X_k$ are independent random variables from the 
+standard normal distribution, then the random variable
+$Q = X^2_1+X^2_2+ \dots +X^2_k$ follows the $\chi^2$ distribution with $k$
+degrees of freedom. The prop.test() function presents the X-squared test statistic. Therefore, we take $z^2$.
+
+
+
+```{r twosample1-solutionb, solution = TRUE}
+p1 <- 50/100
+p2 <- 55/70
+n1 <- 100
+n2 <- 70
+p <- (n1*p1 + n2*p2)/(n1 + n2)
+
+z = ((p1 - p2) + (1/2)*(1/n1 + 1/n2)) / (sqrt( p*(1-p)*(1/n1 + 1/n2)  )   ) 
+z^2
+```
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `survey` (from the package `MASS`). 
+
+* We want to investigate whether the variables `Sex` and `Clap` are independent. Define the null and alternative hypothesis.
+* Perform the test. What is the conclusion?
+* Calculate the test statistic manually.
+
+
+
+```{r twosample2a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample2a">Hint</button>
+<div id = "twosample2a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function chisq.test() to investigate whether two categorical variables are independent.
+</div>')
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2\\n")
+```
+
+Null hypothesis: there is no association between the variables sex and clap.\
+Alternative hypothesis: there is an association between the variables sex and clap.
+
+
+```{r twosample2-solution, solution = TRUE}
+chisq.test(table(survey$Sex, survey$Clap))
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we cannot reject the null hypothesis that the variables sex and clap are independent.
+
+
+The test statistic (without continuity correction) is:
+
+$X2 = \sum_{i=1}^K \frac{(O_i-E_i)^2}{E_i}$,\
+where $K$ are the contingency table cells, $O$ is the observed value and $E$ the expected value.
+
+```{r twosample2-solutionb, solution = TRUE}
+# Calculate the test statistic manually
+# Observe the total number of observations for the rows and columns:
+addmargins(table(survey$Sex, survey$Clap))
+
+# Obtain the observed and expected data:
+Obs <- c(table(survey$Sex, survey$Clap))
+Exp <- c(118*39/235, 117*39/235, 118*49/235, 117*49/235, 118*147/235, 117*147/235)
+
+test_statistic <- sum((Obs - Exp)^2/Exp)
+test_statistic
+```
+
+
+
+
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 3\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `survey` (from the package `MASS`). 
+
+* Investigate whether the variables `Sex` and `M.I` are independent using the exact test.
+
+
+
+```{r twosample3a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample3a">Hint</button>
+<div id = "twosample3a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function fisher.test() to investigate whether two categorical variables are independent using the exact test.
+</div>')
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 3\\n")
+```
+
+```{r twosample3-solution, solution = TRUE}
+fisher.test(table(survey$Sex, survey$M.I))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 4*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `survey` (from the package `MASS`). 
+
+* Investigate whether the variables `Sex` and `M.I` are independent for the `Clap` equal to `Left` group.
+
+
+
+```{r twosample4a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample4a">Hint</button>
+<div id = "twosample4a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+We have small sample size, so it might be a better idea to use the exact test. 
+</div>')
+```
+
+```{r twosample4b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#twosample4b">Hint</button>
+<div id = "twosample4b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function fisher.test() to investigate whether two categorical variables are independent using the exact test.
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 4*\\n")
+```
+
+```{r twosample4-solution, solution = TRUE}
+# Select only the left group from the Clap variable
+survey_leftClap <- survey[survey$Clap == "Left", ]
+
+fisher.test(table(survey_leftClap$Sex, survey_leftClap$M.I))
+```

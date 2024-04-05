@@ -1,0 +1,300 @@
+---
+title: "Biostatistics I: Introduction to R"
+subtitle: "Common objects"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+```{r setup, include=FALSE}
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+## In this Section
+
+* Objects in R
+
+* Data types
+
+* Data structures
+
+* A lot of practice
+
+
+
+## Objects in R
+
+* In R Everything (data, results, ...) is an object
+
+* In order to list the created objects use the following functions
+```{r, eval = FALSE, include = TRUE, echo = TRUE}
+objects()
+ls()
+```
+
+\pause
+
+  - In order to remove objects
+```{r, eval = FALSE, include = TRUE, echo = TRUE}
+rm()
+rm(list=ls(all=TRUE))
+```
+
+
+## Objects in R  
+
+* To investigate a specific object (e.g. pbc)
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+str(pbc[,c("id", "time", "status", "trt", "age", "sex", "bili", "chol")])
+```
+
+
+## Data Types
+
+The simplest data types are:
+
+* \textbf{\blue{numeric}} : quantitative data
+* \textbf{\blue{character}} : qualitative data
+* \textbf{\blue{integer}} : whole numbers
+* \textbf{\blue{logical}} : TRUE or FALSE
+* \textbf{\blue{factors}} : qualitative data (levels)
+
+
+## Data Types in R
+
+To find out what type of object you have, you can use the following function
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+mode(pbc$age)
+```
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+str(pbc$age)
+```
+
+## Data Structures  
+
+The most important data structures are:
+
+  - \textbf{\blue{Scalar}} a single element
+  - \textbf{\blue{Vectors}} have the same type of elements
+  - \textbf{\blue{Matrices}} have the same type of elements with the same length 
+  - \textbf{\blue{Arrays}} have the same type of elements with the same length but can store the data in more than two dimensions
+  - \textbf{\blue{Data frames}} have elements of different type with the same length 
+  - \textbf{\blue{Lists}} have elements of different type and length 
+
+
+## Data Structures  
+
+\textbf{\blue{How do these data structures look like?}}
+
+
+## Data Structures  
+
+* Differences between \blue{vector}, matrix, array, data.frame and list
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+pbc[1:6, c("age")]
+```
+
+## Data Structures  
+
+* Differences between vector, \blue{matrix}, array, data.frame and list
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+pbc[1:6, c("age", "bili", "chol")]
+```
+
+
+## Data Structures  
+
+* Differences between vector, matrix, \blue{array}, data.frame and list
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+pbc[1:3, c("age", "bili", "chol")]
+pbc[4:6, c("age", "bili", "chol")]
+```
+
+## Data Structures  
+
+* Differences between vector, matrix, \blue{array}, data.frame and list
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+pbc[1:2, c("protime", "time")]
+pbc[3:4, c("protime", "time")]
+```
+
+## Data Structures  
+
+* Differences between vector, matrix, array, \blue{data.frame} and list
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+pbc[1:6, c("id", "sex", "bili", "chol")]
+```
+
+
+## Data Structures  
+
+* Differences between vector, matrix, array, data.frame and \blue{list}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+pbc[1:6, c("sex")]
+pbc[1:2, c("sex", "bili")]
+pbc[1:4, c("age")]
+```
+
+
+## Data Structures in R 
+
+\textbf{\blue{Let's now create different data structure in R!}}
+
+
+## Data Structures in R  
+\blue{Create a vector}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+vec <- c(1, 2, 3, 4, 5)
+vec
+vec <- c(1:5)
+vec
+```
+
+
+
+## Data Structures in R  
+\blue{Create a matrix}
+
+\begincols[t]
+\begincol{0.5\linewidth}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+vec <- c(1, 2, 3, 4, 5, 6, 7, 8, 9)
+mat <- matrix(data = vec, 
+              nrow = 3, ncol = 3)
+mat 
+```
+
+\pause
+
+\endcol
+\begincol{0.5\linewidth}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+vec <- c(1, 2, 3, 4, 5, 6, 7, 8, 9)
+mat <- matrix(data = vec, 
+              nrow = 3, ncol = 3, 
+              byrow = TRUE)
+mat
+```
+\endcol
+\endcols\vspace*{3ex}
+
+
+## Data Structures in R  
+\blue{Create an array}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+ar <- array(data = c(1, 2, 3, 4, 5, 6, 7, 8), dim = c(2, 2, 2))
+ar
+```
+
+
+## Data Structures in R  
+\blue{Create an array}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+ar <- array(data = c(1, 2, 3, 4), dim = c(2, 2, 1))
+ar
+```
+
+
+## Data Structures in R  
+\blue{Create a data frame}
+
+\begincols[t]
+\begincol{0.45\linewidth}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+dtf <- data.frame(pbc[, "sex"], 
+                  pbc[, "age"])
+dtf[1:3,]
+```
+
+\pause
+
+\endcol
+\begincol{0.58\linewidth}
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+dtf <- data.frame(Gender = pbc[, "sex"], 
+            Age = pbc[, "age"])
+dtf[1:3,]
+```
+\endcol
+\endcols\vspace*{3ex}
+
+
+
+## Data Structures in R  
+\blue{Create a list}
+
+```{r, eval = TRUE, include = TRUE, echo = TRUE}
+list1 <- list(vec = c(1:5), mat = pbc[1:2, c("age", "sex")])
+list1
+```
+
+
+
+## Summary
+
+\begin{columns}[onlytextwidth,T]
+\begin{column}{0.60\linewidth}
+
+\bigskip
+
+\blue{Data types}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{is.numeric()} / \texttt{as.numeric()}
+\item \texttt{is.character()} / \texttt{as.character()}
+\item \texttt{is.integer()} / \texttt{as.integer()}
+\item \texttt{is.logical} / \texttt{as.logical()}
+\item \texttt{is.factor()} / \texttt{as.factor()}
+\item \texttt{str()}, \texttt{mode()}
+\end{itemize}
+
+\end{column}
+
+\begin{column}{0.3\linewidth}
+
+\blue{Data structures}
+\begin{itemize}\vspace*{-0.5ex}
+\item \texttt{c()}
+\item \texttt{matrix()}
+\item \texttt{array()}
+\item \texttt{data.frame()}
+\item \texttt{list()}
+\end{itemize}
+
+\bigskip
+
+\blue{Other}
+\begin{itemize}
+\item \texttt{ls()}, \texttt{objects()}
+\end{itemize}
+
+\end{column}
+\end{columns}
+
+

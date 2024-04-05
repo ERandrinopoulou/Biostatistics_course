@@ -1,0 +1,961 @@
+---
+title: "Biostatistics I: Hypothesis testing"
+subtitle: "Introduction"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+* Types of tests
+
+* General procedure
+
+* Example
+
+
+ 
+## Types of tests  
+
+* \blue{parametric} (assumptions about the distribution) / \blue{non-parametric} (distribution-free)
+
+\vspace*{7cm}
+
+
+## Types of tests  
+
+* \blue{parametric} (assumptions about the distribution) / \blue{non-parametric} (distribution-free)
+
+\vspace*{0.3cm}
+
+* \blue{one sample} / \blue{two samples} / .. / \blue{$M$ samples}
+
+\vspace*{-0.3cm}
+
+\begincols
+  \begincol{0.4\textwidth}
+  
+\begin{itemize}
+\item compare one group with a value
+\item compare two groups 
+
+       paired / unpaired
+     
+\item compare $M$ groups 
+\end{itemize}
+
+ \endcol
+\begincol{0.48\linewidth}
+
+
+```{r samples, fig.show='animate', interval=1/0.5, include = FALSE, cache = TRUE, eval = TRUE, fig.height=4, fig.width=5, dpi=72, dev='png'}
+set.seed(2021)
+x1 <- rnorm(50, 10, 5.5)
+x2 <- rnorm(50, 20, 5)
+x3 <- rnorm(50, 30, 3)
+
+id1 <- c(1:50)
+id2 <- c(101:150)
+id3 <- c(201:250)
+dat <- data.frame(id = c(id1, id2, id3), x = c(x1, x2, x3))
+
+library(ggplot2)
+library(ggimage)
+
+df_img <- data.frame(phase = c("Clipart_white"),
+                     image = c("clipart_white.png"))
+df_img$phase <- factor(df_img$phase, levels = df_img$phase)
+
+
+color_vec1 <- c("white", "white", "white", "white")
+color_vec2 <- c("grey30", "white", "white", "white")
+color_vec3 <- c("grey30", "grey30", "white", "white")
+color_vec4 <- c("grey30", "grey30", "grey30", "white")
+for (k in 1:4){
+  datN <- dat[1:(50*k), ]
+  print(ggplot(datN, aes(x = id, y = x)) +
+    geom_image(data = datN, aes(image = df_img$image), size = 0.02) +
+    labs(x = "", y = "") + 
+    theme(axis.text.x = element_blank(), 
+          panel.background = element_rect(fill="grey30", colour="grey30"), 
+          panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          axis.text.y=element_blank(), axis.ticks = element_blank()) +
+    annotate(geom = "text", x = 30, y = 52, label = "Group 1",
+                color = color_vec1[k], cex = 5) +
+    annotate(geom = "text", x = 122, y = 52, label = "Group 2",
+                color = color_vec2[k], cex = 5) +
+    annotate(geom = "text", x = 225, y = 52, label = "Group 3",
+                color = color_vec3[k], cex = 5) +
+    annotate(geom = "text", x = 290, y = 20, label = "...",
+                color = color_vec4[k], cex = 6) +  
+    ylim(0, 54) + xlim(0, 300) +
+    ggtitle(""))
+}
+```
+
+
+\begin{center}
+\animategraphics[loop, autoplay, scale=0.5]{2}{Hypothesis_testing_files/figure-beamer/samples-}{1}{4}
+\end{center}
+
+ \endcol
+\endcols
+  
+\vspace*{7cm}
+
+  
+## Types of tests  
+
+* \blue{parametric} (assumptions about the distribution) / \blue{non-parametric} (distribution-free)
+
+\vspace*{0.3cm}
+
+* \blue{one sample} / \blue{two samples} / .. / \blue{$M$ samples}
+
+\vspace*{-0.3cm}
+
+\begincols
+  \begincol{0.4\linewidth}
+  
+\begin{itemize}
+\item compare one group with a value
+\item compare two groups 
+     
+      paired / unpaired
+     
+\item compare $M$ groups 
+\end{itemize}
+
+ \endcol
+\begincol{0.48\linewidth}
+
+
+\begin{center}
+\animategraphics[loop, autoplay, scale=0.5]{2}{Hypothesis_testing_files/figure-beamer/samples-}{1}{4}
+\end{center}
+
+ \endcol
+\endcols
+
+\vspace*{-0.2cm}
+
+* \blue{one-sided (one-tailed)} / \blue{two-sided (two-tailed)}
+
+\begincols
+  \begincol{0.3\linewidth}
+
+$H_0: \theta = \theta_0$
+
+ \endcol
+\begincol{0.48\linewidth}
+
+$H_1: \theta \neq \theta_0$ (two-sided)\
+$H_1: \theta > \theta_0$ (one-sided) \
+$H_1: \theta < \theta_0$ (one-sided) 
+
+ \endcol
+\endcols
+
+\vspace*{7cm}
+
+
+## General procedure
+
+- Choose a null hypothesis $H_0$ and an alternative hypothesis $H_1$
+- Collect and visualize the data
+- Choose and calculate the test statistic, which is a numerical summary of the data
+- Determine the sampling distribution under the condition that the null-hypothesis holds
+- Choose the type I error (significant level) $\alpha$, usually $\alpha$=0.05
+- Determine the corresponding critical value(s)
+- Compare the test statistic with critical value(s) and reject or not
+ 
+
+
+## Draw conclusions
+
+The purple area represents the rejection region of $H_0$
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=4, fig.width=10}
+library(ggplot2)
+library(gridExtra)
+mu = 79
+SD = 9
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.96 * SD, mu + 1.96 * SD)
+meanX <- mean(x)
+
+RI2 <- c(mu - 1.64 * SD, mu + 1.64 * SD)
+
+dat <- with(density(x), data.frame(x, y))
+p1 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 58, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2]),
+                     labels=c("- critical value", "critical value"),
+                     limits = c(30, 120)) +
+  ggtitle("Two-sided test")
+
+p2 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI2[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  #geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, 0)), 
+  #          fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # #annotate(geom = "text", x = 58, y = 0.001, label = "5%",
+  # #            color = "white", cex = 3) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI2[2]),
+                     labels=c("critical value"),
+                     limits = c(30, 120)) +
+  ggtitle("One-sided test")
+
+p3 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x <= RI2[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # #annotate(geom = "text", x = 58, y = 0.001, label = "5%",
+  # #            color = "white", cex = 3) +
+  # annotate(geom = "text", x = 61, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI2[1]),
+                     labels=c("- critical value"),
+                     limits = c(30, 120)) +
+  ggtitle("One-sided test")
+
+grid.arrange(p1, p2, p3, nrow = 1)
+```
+
+
+
+
+
+## Draw conclusions
+
+The purple area represents the non rejection region of $H_0$ 
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=4, fig.width=10}
+library(ggplot2)
+library(gridExtra)
+mu = 79
+SD = 9
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.96 * SD, mu + 1.96 * SD)
+meanX <- mean(x)
+
+RI2 <- c(mu - 1.64 * SD, mu + 1.64 * SD)
+
+dat <- with(density(x), data.frame(x, y))
+p1 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x > RI[1] & x < RI[2], x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 58, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  # annotate(geom = "text", x = 101, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2]),
+                     labels=c("critical value", "- critical value"),
+                     limits = c(30, 120)) +
+  ggtitle("Two-sided test")
+
+p2 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x <= RI2[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI2[2]),
+                     labels=c("critical value"),
+                     limits = c(30, 120)) +
+  ggtitle("One-sided test")
+
+p3 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI2[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 61, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI2[1]),
+                     labels=c("- critical value"),
+                     limits = c(30, 120)) +
+  ggtitle("One-sided test")
+
+grid.arrange(p1, p2, p3, nrow = 1)
+```
+
+
+
+
+
+## Draw conclusions
+
+For example:
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=4, fig.width=10}
+library(ggplot2)
+library(gridExtra)
+mu = 79
+SD = 9
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.96 * SD, mu + 1.96 * SD)
+meanX <- mean(x)
+
+RI2 <- c(mu - 1.64 * SD, mu + 1.64 * SD)
+
+dat <- with(density(x), data.frame(x, y))
+p1 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 58, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2], 105),
+                     labels=c("- critical value", "critical value", "test statistic"),
+                     limits = c(30, 120), guide = guide_axis(n.dodge = 2)) +
+  ggtitle("Two-sided test: reject H0")
+
+p2 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI2[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  #geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, 0)), 
+  #          fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # #annotate(geom = "text", x = 58, y = 0.001, label = "5%",
+  # #            color = "white", cex = 3) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI2[2], 99),
+                     labels=c("critical value", "test statistic"),
+                     limits = c(30, 120), guide = guide_axis(n.dodge = 2)) +
+  ggtitle("One-sided test: reject H0")
+
+p3 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x <= RI2[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # #annotate(geom = "text", x = 58, y = 0.001, label = "5%",
+  # #            color = "white", cex = 3) +
+  # annotate(geom = "text", x = 61, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(55, RI2[1]),
+                     labels=c("test statistic", "- critical value"),
+                     limits = c(30, 120), guide = guide_axis(n.dodge = 2)) +
+  ggtitle("One-sided test: reject H0")
+
+grid.arrange(p1, p2, p3, nrow = 1)
+```
+
+
+
+## Draw conclusions
+
+For example:
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=4, fig.width=10}
+library(ggplot2)
+library(gridExtra)
+mu = 79
+SD = 9
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.96 * SD, mu + 1.96 * SD)
+meanX <- mean(x)
+
+RI2 <- c(mu - 1.64 * SD, mu + 1.64 * SD)
+
+dat <- with(density(x), data.frame(x, y))
+p1 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 58, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], 83, RI[2]),
+                     labels=c("- critical value", "test statistic", "critical value"),
+                     limits = c(30, 120), guide = guide_axis(n.dodge = 2)) +
+  ggtitle("Two-sided test: do not reject H0")
+
+p2 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI2[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  #geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, 0)), 
+  #          fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # #annotate(geom = "text", x = 58, y = 0.001, label = "5%",
+  # #            color = "white", cex = 3) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(84, RI2[2]),
+                     labels=c("test statistic", "critical value"),
+                     limits = c(30, 120), guide = guide_axis(n.dodge = 2)) +
+  ggtitle("One-sided test: do not reject H0")
+
+p3 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x <= RI2[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # #annotate(geom = "text", x = 58, y = 0.001, label = "5%",
+  # #            color = "white", cex = 3) +
+  # annotate(geom = "text", x = 61, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI2[1], 75),
+                     labels=c("- critical value", "test statistic"),
+                     limits = c(30, 120), guide = guide_axis(n.dodge = 2)) +
+  ggtitle("One-sided test: do not reject H0")
+
+grid.arrange(p1, p2, p3, nrow = 1)
+```
+
+
+
+
+## Draw conclusions
+
+Translate that into probabilities: the p-value (purple area) is the probability of obtaining test results at least as extreme as the results observed in the original sample, under the assumption that the null hypothesis is correct
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=4, fig.width=10}
+library(ggplot2)
+library(gridExtra)
+mu = 79
+SD = 9
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.96 * SD, mu + 1.96 * SD)
+meanX <- mean(x)
+
+RI2 <- c(mu - 1.64 * SD, mu + 1.64 * SD)
+
+dat <- with(density(x), data.frame(x, y))
+p1 <-  ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 58, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "2.5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2]),
+                     labels=c("- test statistic", "test statistic"),
+                     limits = c(30, 120)) +
+  ggtitle("Two-sided test")
+
+p2 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI2[2] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 99, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI2[2]),
+                     labels=c("test statistic"),
+                     limits = c(30, 120)) +
+  ggtitle("One-sided test")
+
+p3 <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x <= RI2[1] , x, 0)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  # annotate(geom = "text", x = 79, y = 0.01, label = "95%",
+  #             color = "white", cex = 6) +
+  # annotate(geom = "text", x = 61, y = 0.001, label = "5%",
+  #             color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.05), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI2[1]),
+                     labels=c("- test statistic"),
+                     limits = c(30, 120)) +
+  ggtitle("One-sided test")
+
+grid.arrange(p1, p2, p3, nrow = 1)
+```
+
+
+## Confidence interval
+
+* Always present both the value and precision of the parameter of interest
+
+* Statistically significant effect $\neq$ practically significant effect
+
+* Confidence interval and p-value/critical value(s) always agree
+
+Confidence level = 1 – significance level ($\alpha$)
+
+
+
+
+
+
+## Example
+
+We make the hypothesis that the mean height of Dutch women older than 18 is larger than 1.7 cm
+
+* Collect data! Select one representative sample
+
+
+```{r sampleres, fig.show='animate', interval=1/0.5, include = FALSE, cache = TRUE, eval = TRUE, fig.height=4, fig.width=5, dpi=72, dev='png'}
+set.seed(20181111)
+x <- runif(100, 0, 100)
+y <- runif(100, 0, 100)
+library(ggplot2)
+library(ggimage)
+
+for (k in 1:5) {
+  sam <- sample(1:100, 20)
+  dat <- data.frame(x = x, y = y)
+  df_img <- data.frame(phase = c("Clipart"),
+                       image = c("clipart.png"))
+  df_img$phase <- factor(df_img$phase, levels=df_img$phase)
+  p1 <- ggplot() +
+    geom_image(data = dat[-sam,], aes(image = df_img$image, x = x, y = y), 
+               size = 0.02, col = "white") +
+    geom_image(data = dat[sam,], aes(image = df_img$image, x = x, y = y), 
+               size = 0.02, col = rgb(0.6769,0.4447,0.7114)) +
+    ylab(" ") +
+    theme(axis.text.x = element_blank(), axis.title.x = element_blank(), #axis.title.y = element_blank(), 
+          panel.background = element_rect(fill="grey30", colour="grey30"), 
+          panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          axis.text.y=element_blank(), axis.ticks = element_blank()) +
+    labs(title=paste("Sample", k ))
+    print(p1)
+}
+```
+
+
+\begin{center}
+\animategraphics[loop, autoplay, scale=0.5]{2}{Hypothesis_testing_files/figure-beamer/sampleres-}{1}{5}
+\end{center}
+
+
+## Example
+
+The distribution of the statistic of those different samples is called sampling distribution \
+
+
+\begin{center}
+\animategraphics[loop, autoplay, scale=0.5]{2}{Hypothesis_testing_files/figure-beamer/sampleres-}{1}{5}
+\end{center}
+
+
+
+## Example
+
+This is a one sample, one-tailed test. We have:
+
+- $H_0: \mu = 1.7$ \
+- $H_1: \mu > 1.7$ \
+
+where\
+$\mu$ is the mean height of all Dutch women older than 18
+\newline\newline
+The test statistic is $z = \frac{\bar{x} - \mu_0}{sd(x)/\sqrt{n}}$,
+\newline\newline
+$\mu_0$ is the estimate under the null hypothesis
+\newline\newline
+
+A test statistic is used to determine whether to reject (or not) the $H_0$
+
+
+## Example
+
+Let's assume that:
+
+- $n = 500$  
+- $\bar{x} = 1.79$ 
+- $sd(x) = 1.1$
+
+The test statistic will be $z = \frac{\bar{x} - \mu_0}{sd(x)/\sqrt{n}} = \frac{1.79 - 1.7}{1.1/\sqrt{500}} = 1.83$
+\newline
+
+
+
+## Example
+
+The sampling distribution depends on
+
+- the underlying distribution of the population
+- the statistic 
+- the sampling procedure 
+- the sample size 
+
+The sampling distribution will be the normal distribution
+\newline\newline
+Test statistic VS critical values from sampling distribution: how likely it is that we would get that statistic if we were sampling from a population that has the null hypothesis characteristics
+
+
+## Example
+
+We choose the type I error ($\alpha$) to be 0.05. The critical value$_{\alpha}$ is then obtained from the standard normal distribution and compared to the test statistic
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=5, fig.width=7, out.width = '60%'}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.95 * SD, mu + 1.95 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= 1.65 , x, 10)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = "95%",
+              color = "white", cex = 7) +
+  annotate(geom = "text", x = 2.2, y = 0.01, label = "5%",
+              color = "white", cex = 5) +
+  coord_cartesian(ylim = c(-0.003, 0.4), xlim = c(-4, 4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 13), axis.title.y = element_text(size = 17)) +
+  scale_x_continuous(breaks=c(1.65),
+                     labels=c("cricical value"),
+                     guide = guide_axis(n.dodge = 2))
+```
+
+
+
+## Example
+
+Using ```R``` we get the critical values from standard normal distribution:
+critical value$_\alpha$ = critical value$_{0.05}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qnorm(p = 0.05, lower.tail = FALSE)
+```
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=4, fig.width=7, out.width = '60%'}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.95 * SD, mu + 1.95 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= 1.63 , x, 10)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  # geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, -3)), 
+  #           fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = "95%",
+              color = "white", cex = 7) +
+  annotate(geom = "text", x = 2.2, y = 0.01, label = "5%",
+              color = "white", cex = 5) +
+  coord_cartesian(ylim = c(-0.003, 0.4), xlim = c(-4, 4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 13), axis.title.y = element_text(size = 17)) +
+  scale_x_continuous(breaks=c(1.65),
+                     labels=c("cricical value = 1.65"),
+                     guide = guide_axis(n.dodge = 2))
+```
+
+## Example
+
+test statistic > critical value$_{\alpha}$ $\Rightarrow$ reject the $H_0$
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=5, fig.width=7, out.width = '60%'}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.95 * SD, mu + 1.95 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= 1.63 , x, 10)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  # geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, -3)), 
+  #           fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = "95%",
+              color = "white", cex = 7) +
+  annotate(geom = "text", x = 2.2, y = 0.01, label = "5%",
+              color = "white", cex = 5) +
+  coord_cartesian(ylim = c(-0.003, 0.4), xlim = c(-4, 4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 13), axis.title.y = element_text(size = 17)) +
+  scale_x_continuous(breaks=c(1.65, 2),
+                     labels=c("cricical value = 1.65", "test statistic = 1.83"),
+                     guide = guide_axis(n.dodge = 2))
+```
+
+
+## Example
+
+The p-value is:
+ 
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+pnorm(q = 1.83, lower.tail = FALSE)
+```
+
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=4, fig.width=7, out.width = '60%'}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.95 * SD, mu + 1.95 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= 2 , x, 10)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  # geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, -3)), 
+  #           fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = "97%",
+              color = "white", cex = 7) +
+  annotate(geom = "text", x = 2.3, y = 0.01, label = "3%",
+              color = "white", cex = 5) +
+  coord_cartesian(ylim = c(-0.003, 0.4), xlim = c(-4, 4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 13), axis.title.y = element_text(size = 17)) +
+  scale_x_continuous(breaks=c(2),
+                     labels=c("test statistic = 1.83"),
+                     guide = guide_axis(n.dodge = 2))
+```
+
+
+## Example
+
+**What about the confidence interval?**
+
+Range of values for the unknown parameter
+
+ - Select the confidence level: represents the probability that the estimated interval will contain the true value of the parameter
+- $z$ follows the standard normal distribution
+
+\begin{align*}
+Pr(-1.96 \leq z \leq 1.96) &= 0.95 \Rightarrow \\  
+Pr(-1.96 \leq \frac{\bar{x}  - \mu_0}{sd(x)/\sqrt{n}} \leq 1.96) &= 0.95 \Rightarrow \\ 
+Pr(-1.96 * sd(x)/\sqrt{n} \leq \bar{x}  - \mu_0 \leq 1.96 * sd(x)/\sqrt{n}) &= 0.95 \Rightarrow  \\ 
+Pr(\bar{x} - 1.96 * sd(x)/\sqrt{n} \leq \mu_0 \leq \bar{x} +1.96 * sd(x)/\sqrt{n}) &= 0.95
+\end{align*}
+
+## Example
+
+In our data:
+
+95\% CI: [$1.79 - 1.96 * 1.1/\sqrt{500}$, $1.79 + 1.96 * 1.1/\sqrt{500}$] $\Rightarrow$ \newline
+95\% CI: [$1.69$, $1.89$]
+\newline\newline
+
+- We chose the confidence level to be 0.95
+- We could, however, assume a 99% confidence interval
+
+

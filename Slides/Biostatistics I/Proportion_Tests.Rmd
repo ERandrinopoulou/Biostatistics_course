@@ -1,0 +1,860 @@
+---
+title: "Biostatistics I: Hypothesis testing"
+subtitle: "Categorical data: Proportion tests"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+
+* $z$-test for proportions
+
+* Bionomial test
+
+* Examples
+
+
+ 
+## $z$-test for proportions: Theory   
+
+\blue{Assumptions}
+
+- The observations are independent of one another
+- The sample size is large enough to use the normal approximation
+$\mathcal{N}(n p, n p (1-p))$\
+    - $np > 10$ and $n(1-p) > 10$, where $n$ is the number of observations and $p$ the proportion
+    
+
+
+## One sample $z$-test for proportions: Theory   
+
+\blue{Scenario} 
+
+Is the probability of being diagnosed with asthma now different than it was 50 years ago?
+
+\blue{Hypothesis}
+
+$H_0: \pi = \pi_0$\newline
+$H_1: \pi \neq \pi_0$
+
+
+
+## One sample $z$-test for proportions: Theory   
+
+\blue{Hypothesis}
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+If \textbf{one-tailed}\newline
+Is the probability of being diagnosed with asthma now higher than it was 50 years ago?\newline
+$H_0:\pi=\pi_0$\newline
+$H_1:\pi>\pi_0$\newline
+\newline
+or\newline
+\newline
+Is the probability of being diagnosed with asthma now lower than it was 50 years ago?\newline
+$H_0:\pi=\pi_0$\newline
+$H_1:\pi<\pi_0$
+}
+
+\end{tcolorbox}
+
+
+## One sample $z$-test for proportions: Theory  
+
+\blue{Test statistic}
+
+For large sample sizes, the distribution of the test statistic is approximately normal
+
+$z = \frac{p-\pi_0}{\sqrt{\frac{\pi_0(1-\pi_0)}{n}}}$
+
+- Sample proportion: $p$
+- Population proportion: $\pi_0$
+- Number of subjects: $n$
+
+
+If continuity correction is applied: $z = \frac{p-\pi_0 + c}{\sqrt{\frac{\pi_0(1-\pi_0)}{n}}}$, \
+
+where\
+
+- $c = -\frac{1}{2n}$ if $p > \pi_0$
+- $c = \frac{1}{2n}$ if $p < \pi_0$
+- $c =0$ if $|p-\pi_0| < \frac{1}{2n}$
+
+
+## One sample $z$-test for proportions: Theory  
+
+\blue{Sampling distribution}
+
+- $z$-distribution 
+- Critical values and p-value
+
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($z$) with the critical values$_{\alpha/2}$ or the p-value with $\alpha$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}: Compare test statistic with the critical value$_{\alpha}$
+
+}
+
+\end{tcolorbox}
+
+
+## One sample $z$-test for proportions: Application
+
+\blue{Scenario} 
+
+Is the probability of being diagnosed with asthma now different than it was 50 years ago?
+
+\blue{Hypothesis}
+
+$H_0: \pi = \pi_0$\newline
+$H_1: \pi \neq \pi_0$
+
+
+## One sample $z$-test for proportions: Application
+
+\begincols
+  \begincol{0.4\textwidth}
+
+\blue{Hypothesis}
+
+$H_0: \pi = \pi_0$\newline
+$H_1: \pi \neq \pi_0$
+
+\vspace*{0.5cm}
+
+\blue{Collect and visualize data}
+\vspace*{0.2cm}
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(2021)
+x <- sample(c("No", "Yes"), 100, replace = TRUE)
+
+kable(table(x))
+```
+
+50 years ago we had $\pi_0 = 0.6$
+
+\endcol
+\begincol{0.5\linewidth}
+
+\blue{Test statistic}
+
+(with no continuity correction):
+$z = \frac{p-\pi_0}{\sqrt{\frac{\pi_0(1-\pi_0)}{n}}} = \frac{0.53-0.6}{\sqrt{\frac{0.6(1-0.6)}{100}}}=-1.43$
+
+\vspace*{0.5cm}
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+ \endcol
+\endcols
+
+
+## One sample $z$-test for proportions: Application 
+
+\blue{Critical values}
+
+\begincols
+  \begincol{0.6\linewidth}
+
+Using ```R``` we get the critical values from the $z$-distribution:\newline
+critical value$_{\alpha/2}$ = critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qnorm(p = 0.05/2, lower.tail = FALSE)
+```
+
+-critical value$_{\alpha/2}$ = -critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qnorm(p = 0.05/2, lower.tail = TRUE)
+```
+
+ \endcol
+\begincol{0.4\linewidth}
+
+\textcolor{white}{texttestestesstdfgzdfgdfgdfgdsdfg}
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = 2, xend = 2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),       
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[2]), limits = c(-3.5,3.5),
+                     labels=c("1.96"))
+```
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = -2, xend = -2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1]), limits = c(-3.5,3.5),
+                     labels=c("-1.96"))
+```
+
+ \endcol
+\endcols
+
+
+
+## One sample $z$-test for proportions: Application 
+
+\blue{Critical values}
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+
+If \textbf{one-tailed}
+\newline\newline
+critical value$_{\alpha}$:\newline
+\texttt{qnorm(p = 0.05, lower.tail = FALSE)}
+ \newline\newline
+or\newline
+ \newline
+-critical value$_{\alpha}$: \newline
+\texttt{qnorm(p = 0.05, lower.tail = TRUE)}
+
+}
+
+\end{tcolorbox}
+
+
+## One sample $z$-test for proportions: Application 
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $z$ > critical value$_{\alpha/2}$ or $z$ < - critical value$_{\alpha/2}$
+
+We have -1.43 > -1.96 $\Rightarrow$ we do not reject the $H_0$
+\newline
+
+\begincols
+  \begincol{0.6\linewidth}
+
+Using ```R``` we obtain the p-value from the $z$-distribution:
+
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * pnorm(q = -1.43, lower.tail = TRUE)
+```
+
+ \endcol
+\begincol{0.4\linewidth}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.95 * SD, mu + 1.95 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, -30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = "85%",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -2.3, y = 0.01, label = "15/2%",
+              color = "white", cex = 3) +
+  annotate(geom = "text", x = 2.3, y = 0.01, label = "15/2%",
+              color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2]), limits = c(-3,3),
+                     labels=c("-1.43", "1.43"))
+```
+
+
+ \endcol
+\endcols
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+## Two sample $z$-test for proportions: Theory   
+
+\blue{Scenario} 
+
+Is the probability of being diagnosed with asthma in the Netherlands different than in Belgium?
+
+\blue{Hypothesis}
+
+$H_0: \pi_1 = \pi_2$\newline
+$H_1: \pi_1 \neq \pi_2$
+
+
+## Two sample $z$-test for proportions: Theory  
+
+\blue{Test statistic}
+
+For large sample sizes, the distribution of the test statistic is approximately normal.
+
+\begincols
+  \begincol{0.3\textwidth}
+
+Pooled version:
+
+$z = \frac{(p_1-p_2) - 0}{\sqrt{p(1-p)\big(\frac{1}{n_1} + \frac{1}{n_2}\big)}}$
+
+\endcol
+\begincol{0.5\linewidth}
+
+Unpooled version:
+
+$z = \frac{(p_1-p_2) - 0}{\sqrt{ \frac{p_1(1-p_1)}{n_1} +  \frac{p_2(1-p_2)}{n_2}  }}$
+
+ \endcol
+\endcols
+
+- Sample proportion of group 1: $p_1$
+- Sample proportion of group 2: $p_2$
+- Number of subjects in group 1: $n_1$
+- Number of subjects in group 2: $n_2$
+- Total proportion: $p = \frac{n_1p_1 + n_2p_2}{n_1 + n_2}$
+
+
+## Two sample $z$-test for proportions: Theory  
+
+\blue{Test statistic}
+
+If continuity correction is applied:
+
+\begincols
+  \begincol{0.3\textwidth}
+
+Pooled version:
+
+$z = \frac{(p_1-p_2) + \frac{F}{2}\big(\frac{1}{n_1} + \frac{1}{n_2}\big)}{ \sqrt{p(1-p)\big(\frac{1}{n_1} + \frac{1}{n_2}\big)}}$
+
+\endcol
+\begincol{0.5\linewidth}
+
+Unpooled version:
+
+$z = \frac{(p_1-p_2) + \frac{F}{2}\big(\frac{1}{n_1} + \frac{1}{n_2}\big)}{\sqrt{ \frac{p_1(1-p_1)}{n_1} +  \frac{p_2(1-p_2)}{n_2}  }}$
+
+ \endcol
+\endcols
+
+where\
+
+- $F = -1$ if $p_1 > p_2$
+- $F = 1$ if $p_1 < p_2$
+
+
+
+
+## Two sample $z$-test for proportions: Theory  
+
+\blue{Sampling distribution}
+
+- $z$-distribution 
+- Critical values and p-value
+
+
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($z$) with the critical values or the p-value with $\alpha$
+
+
+## Two sample $z$-test for proportions: Application
+
+\blue{Scenario} 
+
+Is the probability of being diagnosed with asthma in the Netherlands different than in Belgium?
+
+\blue{Hypothesis}
+
+$H_0: \pi_1 = \pi_2$\newline
+$H_1: \pi_1 \neq \pi_2$
+
+
+## Two sample $z$-test for proportions: Application
+
+\begincols
+  \begincol{0.4\textwidth}
+  
+\blue{Collect and visualize data}
+\vspace*{-0.5cm}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(2021)
+x1 <- sample(c("No", "Yes"), 100, replace = TRUE)
+x2 <- sample(c("No", "Yes"), 100, replace = TRUE)
+kable(table(x1), caption = "the Netherlands")
+kable(table(x2), caption = "Belgium")
+```
+
+\endcol
+\begincol{0.65\linewidth}
+
+\blue{Test statistic}
+
+\begin{scriptsize} 
+(with no continuity correction and pooled version):
+\end{scriptsize}
+\newline
+
+$p = \frac{n_1p_1 + n_2p_2}{n_1 + n_2} = \frac{100 \ 0.53 + 100\  0.38}{100 + 100} = 0.46$
+
+$z = \frac{(p_1-p_2) - 0}{\sqrt{p(1-p)\big(\frac{1}{n_1} + \frac{1}{n_2}\big)}} = \frac{0.53-0.38}{\sqrt{0.46(1-0.46) \big( \frac{1}{100} + \frac{1}{100}  \big)}} = 2.13$
+
+\vspace*{1cm}
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+ \endcol
+\endcols
+
+
+## Two sample $z$-test for proportions: Application 
+
+\blue{Critical values}
+
+\begincols
+  \begincol{0.6\linewidth}
+
+Using ```R``` we get the critical values from the $z$-distribution:\newline
+critical value$_{\alpha/2}$ = critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qnorm(p = 0.05/2, lower.tail = FALSE)
+```
+
+-critical value$_{\alpha/2}$ = -critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qnorm(p = 0.05/2, lower.tail = TRUE)
+```
+
+ \endcol
+\begincol{0.4\linewidth}
+
+\textcolor{white}{texttestestesstdfgzdfgdfgdfgdsdfg}
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = 2, xend = 2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),       
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[2]), limits = c(-3.5,3.5),
+                     labels=c("1.96"))
+```
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = -2, xend = -2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1]), limits = c(-3.5,3.5),
+                     labels=c("-1.96"))
+```
+
+ \endcol
+\endcols
+
+
+## Two sample $z$-test for proportions: Application 
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $z$ > critical value$_{\alpha/2}$ or $z$ < - critical value$_{\alpha/2}$
+
+We have 2.13 > 1.96 $\Rightarrow$ we reject the $H_0$
+\newline
+
+\begincols
+  \begincol{0.6\linewidth}
+  
+Using ```R``` we obtain the p-value from the $z$-distribution:
+
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * pnorm(q = 2.13, lower.tail = FALSE)
+```
+
+ \endcol
+\begincol{0.4\linewidth}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.95 * SD, mu + 1.95 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, -30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = "97%",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -2.3, y = 0.01, label = "3/2%",
+              color = "white", cex = 3) +
+  annotate(geom = "text", x = 2.3, y = 0.01, label = "3/2%",
+              color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2]), limits = c(-3,3),
+                     labels=c("-2.13", "2.13"))
+```
+
+
+ \endcol
+\endcols
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Bionomial test: Theory   
+
+\blue{Assumptions}
+
+- Independent observations
+
+\blue{Notes..}
+
+- The binomial test is an exact test
+    
+
+## Bionomial test: Theory    
+
+\blue{Scenario} 
+
+Is the probability of being diagnosed with asthma now different than it was 50 years ago?
+
+\blue{Hypothesis}
+
+$H_0: \pi = \pi_0$\newline
+$H_1: \pi \neq \pi_0$
+
+
+## Bionomial test: Theory  
+
+If $n$ is the sample size and $k$ the successes:
+$Pr(X = k) = ({n \atop k}) p^k (1-p)^{n-k}$,
+where $({n \atop k}) = \frac{n!}{k!(n-k)!}$ and $!$ indicates a factorial
+
+
+- For any possible outcome of the binomial we obtain the corresponding probability
+- We find the p-value by considering the probability of seeing an outcome as, or more, extreme
+
+   - For a one-tailed test, $H_1:\pi<\pi_0$
+$p-value = \Pr(X = 0) + \dots + Pr(X = k) = \sum_{i=0}^{k}Pr(X = i) = \sum_{i=0}^{k} ({n \atop i}) p^i (1-p)^{n-i}$ 
+
+   - Calculating a p-value for a two-tailed test is more complicated, since a binomial distribution is not symmetric if $\pi_{0}\neq 0.5$ $\Rightarrow$ we cannot double the p-value from the one-tailed test
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+
+## Bionomial test: Application
+
+\begin{tcolorbox}[colback=EMC60,
+                  colframe=EMC60,
+                  width=14cm
+                 ]
+{\color{white} 
+
+\textbf{Scenario} 
+
+\scriptsize Is the probability of being diagnosed with asthma now lower than it was 50 years ago?
+
+}
+\end{tcolorbox}
+
+\begincols
+  \begincol{0.4\linewidth}
+
+\vspace*{0.1cm}
+
+\blue{Hypothesis}
+
+$H_0:\pi=\pi_0$\newline
+$H_1:\pi < \pi_0$
+
+\vspace*{0.2cm}
+
+
+\blue{Collect and visualize data}
+
+- $n = 10$
+- $k = 3$
+- $p = 0.3$
+- $\pi_0 = 0.4$ the probability of being diagnosed with asthma 50 years ago
+
+
+ \endcol
+\begincol{0.55\linewidth}
+
+\vspace*{-0.4cm}
+\blue{P-value}
+
+$Pr(X <= 3)$
+\newline\newline
+Using ```R``` we get the p-value:
+\vspace*{-0.5cm}
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+pbinom(q = 3, size = 10, prob = 0.4) 
+```
+
+\vspace*{0.2cm}
+\blue{Draw conclusions}
+
+We do not reject the $H_0$
+
+ \endcol
+\endcols
+
+
+## Bionomial test: Application
+
+\begin{tcolorbox}[colback=EMC60,
+                  colframe=EMC60,
+                  width=14cm
+                 ]
+{\color{white} 
+
+\textbf{Scenario} 
+
+\scriptsize Is the probability of being diagnosed with asthma now higher than it was 50 years ago?
+
+}
+\end{tcolorbox}
+
+\begincols
+  \begincol{0.4\linewidth}
+
+\vspace*{0.1cm}
+
+\blue{Hypothesis}
+
+$H_0:\pi= \pi_0$\newline
+$H_1:\pi > \pi_0$
+
+\vspace*{0.2cm}
+
+\blue{Collect and visualize data}
+
+- $n = 10$
+- $k = 6$
+- $p = 0.6$
+- $\pi_0 = 0.4$ the probability of being diagnosed with asthma 50 years ago
+
+ \endcol
+\begincol{0.55\linewidth}
+
+\blue{P-value}
+$Pr(X >= 6) = 1 - Pr(X < 6) = 1 - Pr(X <= 5)$
+\newline\newline
+Using ```R``` we get the p-value:
+\vspace*{-0.5cm}
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+pbinom(q = 5, size = 10, prob = 0.4, 
+       lower.tail = FALSE) 
+```
+
+\vspace*{0.2cm}
+\blue{Draw conclusions}
+
+We do not reject the $H_0$
+
+
+ \endcol
+\endcols

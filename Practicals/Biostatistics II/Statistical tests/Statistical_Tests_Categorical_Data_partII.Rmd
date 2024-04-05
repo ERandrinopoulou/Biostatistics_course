@@ -1,0 +1,441 @@
+---
+title: 'Statistical Tests for Categorical Data (part II)'
+output: 
+  html_document:
+    code_folding: show 
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: false
+    theme: spacelab
+    highlight: tango
+    includes:
+      after_body: ../footerEA.html
+    css: ../style.css
+---
+
+
+```{r setup, include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+
+```{r, echo = FALSE, purl = FALSE}
+knitr::knit_hooks$set(purl = knitr::hook_purl)
+
+options(purl = FALSE)
+
+knitr::opts_chunk$set(purl = FALSE)
+```
+
+```{r, include = FALSE}
+knitr::opts_hooks$set(eval = function(opt) {
+  if (any(opt$exercise))
+    opt$eval <- opt$include <- FALSE
+  
+  opt
+})
+
+
+static <- TRUE
+
+options(width = 100)
+
+```
+
+
+```{r packages, include = FALSE}
+library(kableExtra)
+library(knitr)
+```
+
+
+## Preface {data-progressive=FALSE}
+
+Open Rstudio to do the practicals. Note that tasks with * are optional.
+
+### R Packages
+
+In this practical, a number of R packages are used.
+The packages used (with versions that were used to generate the solutions) are:
+
+* `survival` (version: `r packageVersion("survival")`)
+
+_`r R.version.string`_
+
+### Two sample tests (paired data) {.tabset .tabset-fade .tabset-pills}
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the help page of the R function `mcnemar.test()`.
+
+* Use the code from the example to obtain the matrix `Performance`.
+* We want to investigate whether the percentage of approve is different between the 2 surveys (which are taken with one month apart). Define the null and alternative hypothesis. Let's assume that the samples are dependent.
+* Perform the test and save the results in an object called test_res_cat_paired. What is the conclusion?
+* Calculate the test statistic manually and confirm the result with the R function.
+
+
+
+```{r onesample1b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample1b">Hint</button>
+<div id = "onesample1b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function mcnemar.test() to investigate whether the percentages of the two groups are different in a matched setting.
+</div>')
+```
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r onesample1-solution, solution = TRUE}
+Performance <-
+matrix(c(794, 86, 150, 570),
+       nrow = 2,
+       dimnames = list("1st Survey" = c("Approve", "Disapprove"),
+                       "2nd Survey" = c("Approve", "Disapprove")))
+Performance
+```
+
+Null hypothesis: the percentage of approve in the 1st survey is the same with the percentage of approve in the 2nd survey.\
+Alternative hypothesis: the percentage of approve in the 1st survey is different compared to the percentage of approve in the 2nd survey.
+
+
+
+```{r onesample1-solutionb, solution = TRUE}
+test_res_cat_paired <- mcnemar.test(Performance)
+test_res_cat_paired
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we can reject the null hypothesis that the percentages are the same.
+
+
+The test statistic (with continuity correction) is: $X^2=\frac{(\mid b-c \mid -1)^2}{b+c}$,\
+where\
+
+```{r, echo = FALSE}
+set.seed(2021)
+x1 <- sample(0:1, 100, replace = TRUE)
+x2 <- sample(0:1, 100, replace = TRUE)
+
+tab <- table(x1, x2)
+
+tab <- matrix(c("a", "b", "a + b", "c", "d", "c + d", "a + c", "b + d", "n"), 3, 3, byrow = TRUE)
+
+colnames(tab) <- c("Approve (2st Survey)", "Disapprove (2st Survey)", "Total")
+rownames(tab) <- c("Approve (1st Survey)", "Disapprove (1st Survey)", "Total")
+
+library(knitr)
+kable(tab)
+```
+
+```{r onesample1-solutionc, solution = TRUE}
+test_statistic <- (abs(150-86)-1)^2/(150+86)
+test_statistic
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+* Create the following data:
+     - `id`: a vector that consist of the numbers 1 until 100 (integers) where each number is repeated 2 times
+     - `case`: a vector that repeats `c(0, 1)` 100 times
+     - `response`: a vector of length 200 with randomly selected 0 and 1 values
+* Note that the data is in the long format. Use the code `table(response[case == 0], response[case == 1])` to generate the paired table.
+* Investigate whether the percentage of response is different between cases and controls (defined by the case variable). Let's assume that the samples are dependent. What is the conclusion?
+* Investigate the same hypothesis using a conditional logistic regression.
+
+
+
+```{r onesample2b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample2b">Hint</button>
+<div id = "onesample2b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function table() to create the paired table.
+</div>')
+```
+
+
+
+```{r onesample2a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample2a">Hint</button>
+<div id = "onesample2a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function mcnemar.test() to investigate whether the percentages of the two groups are different in a matched setting.
+</div>')
+```
+
+
+```{r onesample2c_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#onesample2c">Hint</button>
+<div id = "onesample2c" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function clogit() from the survival package to perform a conditional logistic regression.
+</div>')
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2*\\n")
+```
+
+```{r onesample2-solution, solution = TRUE}
+# Generate the data
+set.seed(123)
+n = 100
+id <- rep(x = 1:n, each = 2)
+case <- rep(x = 0:1, times = n)
+response <- rbinom(n = n*2, size = 1, prob = 0.5)
+
+# Create the paired table
+table(response[case == 0], response[case == 1])
+
+# Perform the McNemar test
+mcnemar.test(table(response[case == 0], response[case == 1]))
+```
+
+If we assume that the significant level is equal to 0.05, the output indicates that we cannot reject the null hypothesis that the percentages are the same.
+
+```{r onesample2-solutionb, solution = TRUE}
+# Fit the conditional logistic model
+library(survival)
+summary(clogit(response ~ case + strata(id)))
+```
+
+The p-values are similar. You can repeat the analysis assuming a different set.seed().
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Multiple testing {.tabset .tabset-fade .tabset-pills}
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+
+* Create the following data:
+    - before: a vector with length 500 that takes values 0 and 1.
+    - after: a vector with length 500 that takes values 0 and 1.
+    - sex: a vector with length 500 that consists of males and females.
+* Create the paired table for males. Investigate whether the percentage of 1s is different between before and after in male patients. Let’s assume that the samples (before/after) are dependent. Save the results in an object called test_males.
+* Create the paired table for females. Investigate whether the percentage of 1s is different between before and after in female patients. Save the results in an object called test_females.
+* Extract the p-values from the tests and save them to the objects called p_males and p_females. Correct the p-values for multiple testing using the bonferroni method.
+
+```{r multitest1_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#multitest1">Hint</button>
+<div id = "multitest1" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function table() to create the paired table.
+</div>')
+```
+
+```{r multitest1a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#multitest1a">Hint</button>
+<div id = "multitest1a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function mcnemar.test() to investigate whether the percentages of the two groups are different in a matched setting.
+</div>')
+```
+
+```{r multitest1b_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#multitest1b">Hint</button>
+<div id = "multitest1b" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function p.adjust() to return p-values adjusted for multiple testing.
+</div>')
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+
+
+```{r multitest1-solution, solution = TRUE}
+# Create the data:
+set.seed(123)
+before <- sample(x = c(0, 1), size = 500, replace = TRUE)
+after <- sample(x = c(0, 1), size = 500, replace = TRUE)
+sex <- sample(x = c("males", "females"), size = 500, replace = TRUE)
+
+dat <- data.frame(before, after, sex)
+
+# Create the paired table for males:
+tab_males <- table(dat$before[dat$sex == "males"], dat$after[dat$sex == "males"])
+
+# Perform the test for males:
+test_males <- mcnemar.test(tab_males)
+
+# Create the paired table for females:
+tab_females <- table(dat$before[dat$sex == "females"], dat$after[dat$sex == "females"])
+
+# Perform the test for females :
+test_females <- mcnemar.test(tab_females)
+
+# Extract the p-value from the tests:
+p_males <- test_males$p.value
+p_females <- test_females$p.value
+
+# Apply the correction for multiple testing:
+p.adjust(p = c(p_males, p_females), method = "bonferroni")
+         
+# Alternatively  
+m <- 2
+pmin(c(p_males, p_females) * m, 1)
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Explore the pre-loaded data set `iris`. 
+
+* Investigate whether the mean sepal length is different between:
+    - `setosa` and `versicolor` 
+    - `setosa` and `virginica`
+    - `versicolor` and `virginica`
+* Correct the p-values for multiple testing using the holm method.
+
+
+```{r multitest2_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#multitest2">Hint</button>
+<div id = "multitest2" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Since the data looks normally distributed and we have 50 subjects, we can use the t-test. Use the R function t.test() to investigate whether the mean values of two sample groups are different.
+</div>')
+```
+
+```{r multitest2a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#multitest2a">Hint</button>
+<div id = "multitest2a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the R function p.adjust() to return p-values adjusted for multiple testing.
+</div>')
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2*\\n")
+```
+
+
+
+```{r multitest2-solution, solution = TRUE}
+# Explore the data:
+head(iris)
+boxplot(iris$Sepal.Length ~ iris$Species)
+
+par(mfrow = c(1, 3))
+hist(iris$Sepal.Length[iris$Species == "setosa"], 
+     main = "setosa", xlab = "Length")
+hist(iris$Sepal.Length[iris$Species == "versicolor"], 
+     main = "versicolor", xlab = "Length")
+hist(iris$Sepal.Length[iris$Species == "virginica"], 
+     main = "virginica", xlab = "Length")
+
+
+# Perform the tests:
+test1 <- t.test(x = iris$Sepal.Length[iris$Species == "setosa"], 
+                y = iris$Sepal.Length[iris$Species == "versicolor"])
+test2 <- t.test(x = iris$Sepal.Length[iris$Species == "setosa"], 
+                y = iris$Sepal.Length[iris$Species == "virginica"])
+test3 <- t.test(x = iris$Sepal.Length[iris$Species == "versicolor"], 
+                y = iris$Sepal.Length[iris$Species == "virginica"])
+
+# Apply the correction for multiple testing:
+p.adjust(p = c(test1$p.value, test2$p.value, test3$p.value), method = "holm")
+
+# Alternatively
+p <- c(test1$p.value, test2$p.value, test3$p.value)
+
+# order the p-values from the smallest to the largest:
+p_order <- p[order(p)]
+
+# set the number of tests:
+m <- 3
+
+# obtain the 1st adjusted p-value:
+i <- 1
+p_adjust_1 <- (m-i+1) * p_order[i]
+
+# obtain the 2st adjusted p-value:
+i <- 2
+p_adjust_2 <- (m-i+1) * p_order[i]
+
+# obtain the 3st adjusted p-value:
+i <- 3
+p_adjust_3 <- (m-i+1) * p_order[i]
+
+# bring the adjusted p-values in the correct order:
+c(p_adjust_1, p_adjust_2, p_adjust_3)[order(p)]
+```
+

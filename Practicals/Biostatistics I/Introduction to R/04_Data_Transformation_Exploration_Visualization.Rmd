@@ -1,0 +1,614 @@
+---
+title: 'Data Transformation, Exploration and Visualization'
+output: 
+  html_document:
+    code_folding: show
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: false
+    theme: spacelab
+    highlight: tango
+    includes:
+      after_body: ../footerEA.html
+    css: ../style.css
+---
+
+```{r setup, include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+
+```{r, echo = FALSE, purl = FALSE}
+knitr::knit_hooks$set(purl = knitr::hook_purl)
+
+options(purl = FALSE)
+
+knitr::opts_chunk$set(purl = FALSE)
+```
+
+```{r, include = FALSE}
+knitr::opts_hooks$set(eval = function(opt) {
+  if (any(opt$exercise))
+    opt$eval <- opt$include <- FALSE
+  
+  opt
+})
+
+
+static <- TRUE
+
+options(width = 100)
+
+```
+
+
+```{r packages, include = FALSE}
+library(kableExtra)
+library(knitr)
+```
+
+
+```{r load_data, context="data", include=FALSE}
+library(survival)
+```
+
+
+## Preface {data-progressive=FALSE}
+
+Open Rstudio to do the practicals. Note that tasks with * are optional.
+
+
+### R packages
+In this practical, a number of R packages are used.
+The packages used (with versions that were used to generate the solutions) are:
+
+* `survival` (version: `r packageVersion("survival")`)
+* `memisc` (version: `r packageVersion("memisc")`)
+* `ggplot2` (version: `r packageVersion("ggplot2")`)
+
+_`r R.version.string`_
+
+### Dataset {.tabset .tabset-fade .tabset-pills}
+
+For this practical, we will use the **heart** and **retinopathy** data sets from the `survival` package. More details about the data sets can be found in:
+
+https://stat.ethz.ch/R-manual/R-devel/library/survival/html/heart.html
+
+https://stat.ethz.ch/R-manual/R-devel/library/survival/html/retinopathy.html
+
+
+
+## Data Transformation, Exploration and Visualization
+
+Before starting with any statistical analysis it is important to transform and explore your data set.
+
+### Data Transformation {.tabset .tabset-fade .tabset-pills}
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+* As mentioned in the manual of the **heart** data set, `age` is equal to `age` - 48. Let's bring `age` back to the normal scale. Do not overwrite the variable `age`, but create a new variable with the name `age_orig`. \
+* Convert the variable `surgery` into a factor with levels 0: `no` and 1: `yes`.
+
+```{r man1_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#man1">Hint</button>
+<div id = "man1" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the function factor(...) to convert a numeric variable to a factor.
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r man1-solution, solution = TRUE}
+heart$age_orig <- heart$age + 48
+heart$surgery <- factor(heart$surgery, levels = c(0, 1), labels = c("no", "yes"))
+```
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Categorize the variable `age` from the **retinopathy** data set as `young`: [minimum `age` until mean `age`) and `old`: [mean `age` until maximum `age`). Give this variable the name `ageCat`. Print the first 6 rows of the data set **retinopathy**.
+
+```{r man2_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#man2">Hint</button>
+<div id = "man2" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+To dichotomize a numeric variable combine the function as.numeric(...) with a logical condition (e.g., as.numeric(X > 2)). This logical condition will split the numeric variable into two parts (young and old). Use the function factor(...) to convert a variable into a factor. 
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2\\n")
+```
+
+```{r man2-solution, solution = TRUE}
+retinopathy$ageCat <- as.numeric(retinopathy$age >= mean(retinopathy$age))
+retinopathy$ageCat <- factor(retinopathy$ageCat, levels = c(0, 1), labels = c("young", "old"))
+head(retinopathy)
+```
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 3\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Categorize `futime` from data set **retinopathy** as follows: \
+
+* `short`: [minimum `futime` until 25). \
+* `medium`: [25 until 45). \
+* `long`: [45 until maximum `futime`). \
+Give this variable the name `futimeCat`. Print the first 6 rows of the data.
+
+
+```{r man3_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#man3">Hint</button>
+<div id = "man3" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Create a variable that is identical to the futime variable (use the name futimeCut). Then use indexing (e.g., X[X < 25]) to select the correct subset of the new variable futimeCut and set it to the new category (e.g., "short").
+</div>')
+```
+
+
+```{r man3a_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#man3a">Hint</button>
+<div id = "man3a" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+E.g. you can create the low category as: \\
+`retinopathy$futimeCut <- retinopathy$futime` \\
+`retinopathy$futimeCut[retinopathy$futime < 25] <- "short" `\\
+Now continue with the other categories.
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 3\\n")
+```
+
+```{r man3-solution, solution = TRUE}
+retinopathy$futimeCut <- retinopathy$futime
+retinopathy$futimeCut[retinopathy$futime < 25] <- "short"
+retinopathy$futimeCut[retinopathy$futime >= 25 & retinopathy$futime < 45] <- "medium"
+retinopathy$futimeCut[retinopathy$futime >= 45] <- "long"
+head(retinopathy)
+```
+
+
+
+
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 4\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Create 2 vectors of size 50 as follows: \
+
+* `Sex`: takes 2 values 0 and 1. \
+* `Age`: takes values from 20 till 80. \
+* Convert the `Sex` variable into a factor with levels 0: `female` and 1: `male`. \
+* Define the new variable `AgeCat` as dichotomous with `Age` <= 50 to be 0 and 1 otherwise. \
+* Convert the `AgeCat` variable into a factor with levels 0: `young` and 1: `old`. \
+* Overwrite the `Age` variable by $\frac{Age-mean(Age)}{sd(Age)}$.
+
+```{r man4_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#man4">Hint</button>
+<div id = "man4" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+To sample a numeric and categorical variable use the function sample(...). To convert a numeric variable to a categorical use the function factor(...). To dichotomize a numeric variable use the function as.numeric(...).
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 4\\n")
+```
+
+```{r man4-solution, solution = TRUE}
+Sex <- sample(0:1, 50, replace = T)
+Age <- sample(20:80, 50, replace = T)
+Sex <- factor(Sex, levels = c(0:1), labels = c("female", "male"))
+AgeCat <- as.numeric(Age > 50)
+AgeCat <- factor(AgeCat, levels = c(0:1), labels = c("young", "old"))
+Age <- (Age - mean(Age))/sd(Age)
+```
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 5\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Create a data frame with the name `DF` as follows: \
+
+* Include the following vectors: `Sex`, `Age`, `AgeCat` form the previous Task. \
+* Use the names: `Gender`, `StandardizedAge`, `DichotomousAge`. \
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 5\\n")
+```
+
+```{r man5-solution, solution = TRUE}
+DF <- data.frame(Sex, Age, AgeCat)
+DF <- data.frame("Gender" = Sex, "StandardizedAge" = Age, "DichotomousAge" = AgeCat)
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 6\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Create 2 vectors of size 150 as follows: \
+
+* `Treatment`: takes 2 values 1 and 2. \
+* `Weight`: takes values from 50 till 100. \
+* Convert the `Treatment` variable into a factor with levels 1: `no` and 2: `yes`. \
+* Overwrite the `Weight` variable by `Weight` * 1000. \
+* Create a data frame including `Treatment` and `Weight`. \
+
+```{r man6_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#man6">Hint</button>
+<div id = "man6" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+To sample a numeric and categorical variable use the function sample(...). To convert a numeric variable to a categorical use the function factor(...). 
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 6\\n")
+```
+
+```{r man6-solution, solution = TRUE}
+Treatment <- sample(1:2, 150, replace = T)
+Weight <- sample(50:100, 150, replace = T)
+Treatment <- factor(Treatment, levels = c(1:2), labels = c("no", "yes"))
+Weight <- Weight * 1000
+data.frame(Treatment, Weight)
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 7\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Create a list called `my_list` with the following: \
+
+* `let`: `a` to `i`. \
+* `sex`: factor taking the values `males` and `females` and length 50. \
+* `mat`: matrix 
+<TABLE>
+   <TR>
+      <TD>1 \ \  </TD>
+      <TD>2</TD>
+   </TR>
+   <TR>
+      <TD>3 \ \  </TD>
+      <TD>4</TD>
+   </TR>
+</TABLE> 
+
+```{r man7_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#man7">Hint</button>
+<div id = "man7" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+To obtain letters use the function letters(...). To sample a numeric and categorical variable use the function sample(...). To convert a numeric variable to a categorical use the function factor(...). 
+</div>')
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 7\\n")
+```
+
+```{r man7-solution, solution = TRUE}
+let <- letters[1:9]
+sex <- sample(1:2, 50, replace = TRUE)
+sex <- factor(sex, levels = 1:2, labels = c("males", "females"))
+mat <- matrix(1:4 ,2, 2, byrow = TRUE)
+my_list <- list(let = let, sex = sex, mat = mat) 
+```
+
+
+### Data Exploration {.tabset .tabset-fade .tabset-pills}
+
+Let's obtain some descriptive statistics.
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Obtain the mean and standard deviation for the variable `age` using the **heart** data set.
+
+```{r exp1_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#exp1">Hint</button>
+<div id = "exp1" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the functions mean(...) and sd(...).
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r exp1-solution, solution = TRUE}
+mean(heart$age)
+sd(heart$age)
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Using the **retinopathy** data set: \
+
+* Obtain the median and interquartile range for `age`. \ \
+* Obtain the percentage per `type`. \
+* Check whether there are missing in the variable `age`.
+
+```{r exp2_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#exp2">Hint</button>
+<div id = "exp2" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the functions median(...) and IQR(...) to obtain the median and the interquartile range. Load the package memisc and use the function percent(...) in order to obtain the percentages. To check whether there are missing values use the functions sum(is.na(...)).
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2\\n")
+```
+
+```{r exp2-solution, solution = TRUE}
+median(retinopathy$age)
+IQR(retinopathy$age)
+library(memisc)
+percent(retinopathy$type)
+sum(is.na(retinopathy$age)) # any(is.na(retinopathy$age))
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 3*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Using the data frame `DF` from the exercise before (Task 5): \
+
+* Calculate the mean of the variable `StandardizedAge`. \
+* Calculate the standard deviation of the variable `StandardizedAge`. \
+* Calculate the frequencies of the variable `Gender`. \
+* Calculate the frequencies of the variable `DichotomousAge`. \
+* Calculate the frequencies of both variables `Gender` and `DichotomousAge` (crosstab table). \
+* What are the dimensions of the data.frame?
+
+```{r exp3_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#exp3">Hint</button>
+<div id = "exp3" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+To calculate the frequencies, use the functions length(...) or table(...). To obtain the dimensions use the function dim(...).
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 3*\\n")
+```
+
+```{r exp3-solution, solution = TRUE}
+mean(DF$StandardizedAge)
+sd(DF$StandardizedAge)
+length(DF$Gender[DF$Gender == "female"])
+length(DF$Gender[DF$Gender == "male"])
+table(DF$Gender)
+table(DF$Gender, DF$DichotomousAge)
+dim(DF)
+```
+
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 4\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Obtain the pearson and spearman correlation of the variables `year` and `age` of the `heart` data set.
+
+```{r exp4_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#exp4">Hint</button>
+<div id = "exp4" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+To calculate the correlations, use the function cor(...) and check the argument method.
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 4\\n")
+```
+
+```{r exp4-solution, solution = TRUE}
+cor(heart$year, heart$age, method = "pearson")
+cor(heart$year, heart$age, method = "spearman")
+```
+
+
+
+### Data Visualization {.tabset .tabset-fade .tabset-pills}
+
+Let's visualize the data.
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 1\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Using the **heart** data set: \
+
+* Create a scatterplot with the variables `age` and `year`. \
+* Change the labels of the axis. In particular, give the name `Age` for the x-axis and `Year of acceptance` for the y-axis. \
+* Give a different color to the patients that had a transplant. \
+* Add a legend.
+
+```{r plot1_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#plot1">Hint</button>
+<div id = "plot1" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the function plot(..., xlab, ylab, col). Use the function legend(...) to add a legend to the plot.
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 1\\n")
+```
+
+```{r plot1-solution, solution = TRUE}
+plot(heart$age, heart$year)
+plot(heart$age, heart$year, xlab = "Age", ylab = "Year of acceptance")
+plot(heart$age, heart$year, xlab = "Age", ylab = "Year of acceptance", col = heart$transplant)
+legend(-40, 6, c("no", "yes"), col = c("black", "red"), pch = 1)
+```
+
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 2\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Using the **retinopathy** data set: \
+
+* Create a boxplot of `age` per `status`.\
+* Change the colour to blue and green respectively.
+
+```{r plot2_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#plot2">Hint</button>
+<div id = "plot2" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the function boxplot(...). 
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 2\\n")
+```
+
+```{r plot2-solution, solution = TRUE}
+boxplot(retinopathy$age ~ retinopathy$status)
+boxplot(retinopathy$age ~ retinopathy$status, col = c("blue", "green"))
+```
+
+
+```{r, eval = static, echo = FALSE}
+asis_output("#### Task 3*\\n")
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output('<div style="border:2px; border-style:solid; padding: 1em; border-color:#0c2074">')
+```
+
+Using the **retinopathy** data set: \
+
+* Create a smooth plot of `age` with `risk`. \
+* Create a density plot of `age` per `type` group.
+
+```{r plot3_hint, eval = static, results = 'asis', echo = FALSE}
+cat('<button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#plot3">Hint</button>
+<div id = "plot3" class="collapse" style="border:1px; border-style:solid; padding: 1em; border-color:#6d79ac">
+Use the ggplot2 package and the functions: geom_smooth(...) and geom_density(...).
+</div>')
+```
+
+```{r, eval = static, echo = FALSE}
+asis_output("</div>")
+
+asis_output("#### Solution 3*\\n")
+```
+
+```{r plot3-solution, solution = TRUE}
+library(ggplot2)
+ggplot(retinopathy, aes(age, risk)) +
+geom_smooth(colour = 'black', span = 0.4)
+ggplot(retinopathy, aes(age, fill = type)) +
+geom_density(alpha = 0.25) 
+```
+

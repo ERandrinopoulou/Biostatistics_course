@@ -1,0 +1,688 @@
+---
+title: "Biostatistics I: Hypothesis testing"
+subtitle: "Continuous data: Correlation tests"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+
+* Pearson correlation test 
+
+* Spearman correlation test 
+
+* Examples
+
+
+ 
+## Pearson correlation test: Theory   
+
+\blue{Assumptions}
+
+* The variables must be continuous
+* There is a linear relationship between the two variables
+* The data has homoscedasticity
+* The variables is approximately normally distributed
+* The two variables represent paired observations
+* The variables do not contain any outliers
+
+
+## Pearson correlation test: Theory 
+
+\blue{Scenario} 
+
+Is the height of the students in my university linearly associated with their weight?
+
+
+\blue{Connection with linear regression}
+
+$scale(y_{i}) = \beta_0 + \beta_1scale(x_{i}) + \epsilon_i$\
+
+$H_0: \beta_1 = 0$\
+$H_1: \beta_1 \neq 0$
+
+
+
+## Pearson correlation test: Theory  
+
+\blue{Scenario} 
+
+Is the height of the students in my university linearly associated with their weight?
+
+
+\blue{Alternatively}
+
+$H_0: \rho = 0$\
+$H_1: \rho \neq 0$
+
+
+## Pearson correlation test: Theory
+
+\blue{Test statistic}
+
+$t = \frac{r \sqrt{n-2}}{\sqrt{1-r^2}}$
+
+- Sample correlation: $r$\
+- Number of subjects: $n$
+
+\blue{Sampling distribution}
+
+- $t$-distribution with $df = n - 2$ 
+- Critical values and p-value
+
+
+
+## Pearson correlation test: Theory
+
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($t$) with the critical values or the p-value with $\alpha$
+
+
+## Pearson correlation test: Application
+
+\blue{Scenario} 
+
+Is the height of the students in my university linearly associated with their weight?
+
+\blue{Hypothesis}
+
+$H_0: \rho = 0$\newline
+$H_1: \rho \neq 0$
+
+
+## Pearson correlation test: Application
+
+\blue{Collect and visualize data}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 2.5, fig.width = 4, dpi=172, dev='png'}
+library(MASS)
+
+set.seed(2021+1)
+r = 0.83
+data = mvrnorm(n = 50, mu = c(0, 0), 
+               Sigma = matrix(c(1, r, r, 1), nrow=2), 
+               empirical = TRUE)
+x = data[, 1]  # standard normal (mu=0, sd=1)
+y = data[, 2]  
+dat <- data.frame(x = x, y = y)
+
+library(ggplot2)
+library(ggimage)
+
+df_img <- data.frame(phase = c("Clipart"),
+                     image = c("clipart.png"))
+df_img$phase <- factor(df_img$phase, levels=df_img$phase)
+ggplot(dat, aes(x = x, y = y)) +
+  geom_image(aes(image = df_img$image), size = 0.02, col = "white") +
+  geom_abline(intercept = -9.154e-17, slope = 8.300e-01, col = "#5379aa", lwd = 2) +
+  labs(x = "Weight", y = "Height") +
+  theme(axis.text.x = element_blank(),
+        panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks = element_blank())
+```
+
+
+
+## Pearson correlation test: Application
+
+\begincols
+  \begincol{0.4\linewidth}
+
+\blue{Hypothesis}
+
+$H_0: \rho = 0$\newline
+$H_1: \rho \neq 0$\newline
+
+\blue{Test statistic}
+
+Let's assume that:
+
+- Sample correlation $r = 0.83$
+- Number of subjects $n = 50$
+
+$t = \frac{r \sqrt{n-2}}{\sqrt{1-r^2}} = \frac{0.83 \sqrt{50-2}}{\sqrt{1-0.83^2}} = 10.31$
+
+ \endcol
+\begincol{0.48\linewidth}
+
+\vspace*{-3.5cm}
+
+\blue{Degrees of freedom}
+
+$df = 50 - 2 = 48$\newline
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+ \endcol
+\endcols
+
+## Pearson correlation test: Application
+
+\begincols
+  \begincol{0.6\linewidth}
+
+\blue{Critical values}
+
+Using ```R``` we get the critical values from the $t$-distribution:\newline
+critical value$_{\alpha/2}$ = critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qt(p = 0.05/2, 48, lower.tail = FALSE)
+```
+
+-critical value$_{\alpha/2}$ = -critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qt(p = 0.05/2, 48, lower.tail = TRUE)
+```
+
+ \endcol
+\begincol{0.4\linewidth}
+
+\textcolor{white}{texttestestesstdfgzdfgdfgdfgdsdfg}
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = 2, xend = 2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),       
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[2]), limits = c(-3.5,3.5),
+                     labels=c("2.01"))
+```
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = -2, xend = -2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1]), limits = c(-3.5,3.5),
+                     labels=c("-2.01"))
+```
+
+ \endcol
+\endcols
+
+
+
+## Pearson correlation test: Application
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $t$ > critical value$_{\alpha/2}$ or $t$ < - critical value$_{\alpha/2}$
+
+We have 10.31 > 2.01 $\Rightarrow$ we reject the $H_0$
+\newline
+
+\begincols
+  \begincol{0.6\textwidth}
+
+Using ```R``` we obtain the p-value from the $t$-distribution:
+
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * pt(q = 10.31, df = 48, 
+       lower.tail = FALSE)
+```
+
+\endcol
+\begincol{0.4\linewidth}
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 2.95 * SD, mu + 2.95 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, -30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = ">99%",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -3, y = 0.01, label = "<0.0001%",
+              color = "white", cex = 3) +
+  annotate(geom = "text", x = 3, y = 0.01, label = "<0.0001%",
+              color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2], 8), limits = c(-3,3),
+                     labels=c("-10.31", "10.31", 10.31))
+```
+
+
+ \endcol
+\endcols
+
+
+
+
+
+
+
+
+
+
+ 
+## Spearman correlation test: Theory   
+
+\blue{Assumptions}
+
+* The variables must be continuous/ordinal
+* There is a monotonic relationship between the two variables
+* The two variables represent paired observations
+
+
+## Spearman correlation test: Theory 
+
+\blue{Scenario} 
+
+Is the height of the students in my university monotonically associated with their weight?
+
+
+\blue{Connection with linear regression}
+
+The slope becomes the correlation if we use the rank of the two variables of interest
+
+\textit{What is rank?}\newline
+Ranks are integers indicating the rank of some values. E.g. the rank of 3, 10, 16, 6, 2 is 2, 4, 5, 3, 1:
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+rank(c(3, 10, 16, 6, 2))
+```
+
+
+## Spearman correlation test: Theory 
+
+\blue{Connection with linear regression}
+
+$rank(y_i) = \beta_0 + \beta_1rank(x_i) + \epsilon_i$\
+
+$H_0: \beta_1 = 0$\
+$H_1: \beta_1 \neq 0$
+
+\blue{Alternatively}
+
+$H_0: \rho = 0$\newline
+$H_1: \rho \neq 0$
+
+
+
+
+
+## Spearman correlation test: Theory
+
+\blue{Test statistic}
+
+
+$t = \frac{r_R \sqrt{n-2}}{\sqrt{1-r_R^2}}$
+
+
+- Sample correlation based on ranked data: $r_R$  
+- Number of subjects: $n$
+
+
+\blue{Sampling distribution}
+
+- $t$-distribution with $df = n - 2$ 
+- Critical values and p-value
+
+
+
+
+
+## Spearman correlation test: Theory
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($t$) with the critical values$_{\alpha/2}$ or the p-value with $\alpha$
+
+
+
+## Spearman correlation test: Application
+
+\blue{Scenario} 
+
+Is the height of the students in my university monotonically associated with their weight?
+
+\blue{Hypothesis}
+
+$H_0: \rho = 0$\newline
+$H_1: \rho \neq 0$
+
+
+## Spearman correlation test: Application
+
+\blue{Collect and visualize data}
+
+\begincols
+  \begincol{0.5\textwidth}
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 3, fig.width = 5}
+set.seed(2021)
+x <- rnorm(10, 1.74, 0.2) 
+x <- round(x, digits = 2)
+y <- rnorm(10, 60, 10) 
+y <- round(y, digits = 0) 
+dat <- data.frame(x = x, y = y, rank_x = rank(x), rank_y = rank(y))
+
+library(knitr)
+kable(dat)
+
+```
+
+
+\endcol
+\begincol{0.5\linewidth}
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height = 3, fig.width = 5, dpi=172, dev='png'}
+set.seed(2021)
+x <- rnorm(10, 1.74, 0.2) 
+x <- round(x, digits = 2)
+y <- rnorm(10, 60, 10) 
+y <- round(y, digits = 0) 
+dat <- data.frame(x = x, y = y, rank_x = rank(x), rank_y = rank(y))
+
+
+library(ggplot2)
+library(ggimage)
+
+df_img <- data.frame(phase = c("Clipart"),
+                     image = c("clipart.png"))
+df_img$phase <- factor(df_img$phase, levels=df_img$phase)
+ggplot(dat, aes(x = x, y = y)) +
+  geom_image(aes(image = df_img$image), size = 0.02, col = "white") +
+  geom_abline(intercept = -14.74, slope = 44.17, col = "#5379aa", lwd = 2) +
+  labs(x = "Weight", y = "Height") +
+  theme(axis.text.x = element_blank(),
+        panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks = element_blank())
+
+
+p1 <- cor(x, y, method = "spearman")
+p2 <- cor(dat$rank_x, dat$rank_y, method = "pearson")
+```
+
+
+ \endcol
+\endcols
+
+
+## Spearman correlation test: Application
+
+\begincols
+  \begincol{0.4\linewidth}
+
+\blue{Hypothesis}
+
+$H_0: \rho = 0$\newline
+$H_1: \rho \neq 0$\newline
+
+\blue{Test statistic}
+
+Let's assume that:
+
+- Sample correlation $r_R = 0.41$
+- Number of subjects $n = 10$
+
+$t = \frac{r_R \sqrt{n-2}}{\sqrt{1-r_R^2}} = \frac{0.41 \sqrt{10-2}}{\sqrt{1-0.41^2}} = 1.27$
+
+ \endcol
+\begincol{0.48\linewidth}
+
+\vspace*{-3.5cm}
+
+\blue{Degrees of freedom}
+
+$df = 10 - 2 = 8$\newline
+
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+ \endcol
+\endcols
+
+
+## Spearman correlation test: Application
+
+
+\begincols
+  \begincol{0.6\linewidth}
+  
+\blue{Critical values}
+
+Using ```R``` we get the critical values from $t$-distribution:\newline
+critical value$_{\alpha/2}$ = critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qt(p = 0.05/2, df = 8, lower.tail = FALSE)
+```
+
+-critical value$_{\alpha/2}$ = -critical value$_{0.05/2}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qt(p = 0.05/2, df = 8, lower.tail = TRUE)
+```
+
+
+ \endcol
+\begincol{0.4\linewidth}
+
+\textcolor{white}{texttestestesstdfgzdfgdfgdfgdsdfg}
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = 2, xend = 2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),       
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[2]), limits = c(-3.5,3.5),
+                     labels=c("2.31"))
+```
+
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rt(1000000, df = 5)
+RI <- c(mu - 2 * SD, mu + 2 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  annotate(geom = "segment", x = -2, xend = -2, y = 0,
+             yend = dt(2, df = 5),
+             color = rgb(0.6769,0.4447,0.7114), lwd = 1.5) +
+  labs(y="Density", x = "") +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),         
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1]), limits = c(-3.5,3.5),
+                     labels=c("-2.31"))
+```
+
+ \endcol
+\endcols
+
+
+## Spearman correlation test: Application
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $t$ > critical value$_{\alpha/2}$ or $t$ < - critical value$_{\alpha/2}$
+
+We have 1.27 < 2.31 $\Rightarrow$ we do \textit{not} reject the $H_0$
+\newline\newline
+
+\begincols
+  \begincol{0.6\textwidth}
+  
+Using ```R``` we obtain the p-value from the $t$-distribution:
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+2 * pt(q = 1.27, df = 8, lower.tail = FALSE)
+```
+
+\endcol
+\begincol{0.4\linewidth}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=4}
+library(ggplot2)
+mu = 0
+SD = 1
+x <- rnorm(1000000, mu, SD)
+RI <- c(mu - 1.55 * SD, mu + 1.55 * SD)
+meanX <- mean(x)
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= RI[2] , x, 10)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_area(mapping = aes(x = ifelse(x <= RI[1] , x, -30)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+  geom_vline(aes(xintercept = meanX),
+           color = "white", linetype = "dotted",  size = 1) +
+  labs(y="Density", x = "") +
+  annotate(geom = "text", x = 0, y = 0.1, label = "76%",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -2, y = 0.01, label = "24/2%",
+              color = "white", cex = 3) +
+  annotate(geom = "text", x = 2, y = 0.01, label = "24/2%",
+              color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.4), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),        
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(RI[1], RI[2]),
+                     labels=c("-1.27", "1.27"), limits = c(-3,3))
+```
+
+ \endcol
+\endcols
+

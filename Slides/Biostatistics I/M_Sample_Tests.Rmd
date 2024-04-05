@@ -1,0 +1,644 @@
+---
+title: "Biostatistics I: Hypothesis testing"
+subtitle: "Continuous data: M-sample tests"
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation: 
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+## In this Section
+
+
+* Analysis of variance (ANOVA) / F-test
+
+* M-sample Kruskal-Wallis test
+
+* Examples
+
+
+ 
+## Analysis of variance / F-test: Theory   
+
+\blue{Assumptions}
+
+* The variables are continuous
+* The samples are independent
+* Homogeneity of variance
+* The data are normally distributed
+
+
+
+## Analysis of variance / F-test: Theory    
+
+\blue{Scenario} 
+
+Is the mean BMI of the students different in groups 1, 2 and 3?
+
+
+\blue{Connection with linear regression}
+
+$y_i = \beta_0 + \beta_1  x_{1i} + \beta_2 x_{2i} + \epsilon_i,$
+\scriptsize where $x_{1i}$ and $x_{2i}$ indicate whether the subject is in group 2 or 3 \normalsize
+
+$H_0: y_i = \beta_0$ $\Rightarrow$ $H_0: \beta_1 = \beta_2 = 0$
+
+  - ANOVA: each category’s mean is compared to a grand mean
+  - Regression: dummy coded variables
+
+
+\blue{Alternatively}
+
+$H_0: \mu_1 = \mu_2 = \mu_3$ \newline
+$H_1: \mu_1 \neq \mu_2$ or $\mu_2 \neq \mu_3$ or $\mu_1 \neq \mu_3$ 
+
+
+
+## Analysis of variance / F-test: Theory    
+
+\begincols
+  \begincol{0.5\textwidth}
+
+```{r include = TRUE, cache = TRUE, warning = FALSE, eval = TRUE, fig.height=3, fig.width=4, dpi=272, dev='png'}
+set.seed(2021)
+x1 <- rnorm(50, 20, 5)
+x2 <- rnorm(50, 20, 5)
+x3 <- rnorm(50, 20, 5)
+
+id1 <- c(1:50)
+id2 <- c(101:150)
+id3 <- c(201:250)
+dat <- data.frame(id = c(id1, id2, id3), x = c(x1, x2, x3))
+
+library(ggplot2)
+library(ggimage)
+
+df_img <- data.frame(phase = c("Clipart_white"),
+                     image = c("clipart_white.png"))
+df_img$phase <- factor(df_img$phase, levels = df_img$phase)
+
+ggplot(dat, aes(x = id, y = x)) +
+  geom_segment(aes(x = 1, xend = 50, y = 20, yend = 20), 
+               col = "#5379aa", lwd = 2) +
+  geom_segment(aes(x = 101, xend = 150, y = 20, yend = 20), 
+               col = rgb(0.6769,0.4447,0.7114), lwd = 2) +
+  geom_segment(aes(x = 201, xend = 250, y = 20, yend = 20), 
+               col = "#526F35", lwd = 2) +
+  geom_image(aes(image = df_img$image), size = 0.02) +
+  labs(x = "", y = "BMI") + 
+  theme(axis.text.x = element_blank(), 
+        panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks = element_blank()) +
+  annotate(geom = "text", x = 24, y = 52, label = "Group 1",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = 115, y = 52, label = "Group 2",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = 215, y = 52, label = "Group 3",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -9, y = 18, 
+           label = expression(beta[0]),
+              color = "white", cex = 4.5) +
+  annotate(geom = "text", x = -9, y = 22, 
+           label = expression(paste(mu[1], "=")),
+              color = "white", cex = 4.5) +
+  annotate(geom = "text", x = 82, y = 18, 
+           label = expression(beta[0] + beta[1]),
+              color = "white", cex = 4.5) + 
+  annotate(geom = "text", x = 82, y = 22, 
+           label = expression(paste(mu[2], "=")),
+              color = "white", cex = 4.5) +
+  annotate(geom = "text", x = 182, y = 18, 
+           label = expression(beta[0] + beta[2]),
+              color = "white", cex = 4.5) + 
+  annotate(geom = "text", x = 182, y = 22, 
+           label = expression(paste(mu[3], "=")),
+              color = "white", cex = 4.5) +
+  geom_vline(xintercept = 65, col = "white", lwd = 1) +
+    geom_vline(xintercept = 165, col = "white", lwd = 1) +
+  ylim(0, 54) +
+  ggtitle("Null hypothesis")
+```
+
+ \endcol
+\begincol{0.5\linewidth}
+
+```{r include = TRUE, cache = TRUE, warning = FALSE, eval = TRUE, fig.height=3, fig.width=4, dpi=272, dev='png'}
+x1 <- rnorm(50, 20, 5)
+x2 <- rnorm(50, 27, 5)
+x3 <- rnorm(50, 18, 3)
+
+id1 <- c(1:50)
+id2 <- c(101:150)
+id3 <- c(201:250)
+dat <- data.frame(id = c(id1, id2, id3), x = c(x1, x2, x3))
+
+library(ggplot2)
+library(ggimage)
+
+df_img <- data.frame(phase = c("Clipart_white"),
+                     image = c("clipart_white.png"))
+df_img$phase <- factor(df_img$phase, levels = df_img$phase)
+
+ggplot(dat, aes(x = id, y = x)) +
+  geom_segment(aes(x = 1, xend = 50, y = 20, yend = 20), 
+               col = "#5379aa", lwd = 2) +
+  geom_segment(aes(x = 101, xend = 150, y = 27, yend = 27), 
+               col = rgb(0.6769,0.4447,0.7114), lwd = 2) +
+  geom_segment(aes(x = 201, xend = 250, y = 18, yend = 18), 
+               col = "#526F35", lwd = 2) +
+  geom_image(aes(image = df_img$image), size = 0.02) +
+  labs(x = "", y = "BMI") + 
+  theme(axis.text.x = element_blank(), 
+        panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.y=element_blank(), axis.ticks = element_blank()) +
+  annotate(geom = "text", x = 24, y = 52, label = "Group 1",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = 115, y = 52, label = "Group 2",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = 215, y = 52, label = "Group 3",
+              color = "white", cex = 6) +
+  annotate(geom = "text", x = -9, y = 17, 
+           label = expression(beta[0]),
+              color = "white", cex = 4.5) +
+  annotate(geom = "text", x = -9, y = 21, 
+           label = expression(paste(mu[1], "=")),
+              color = "white", cex = 4.5) +
+  annotate(geom = "text", x = 82, y = 24, 
+           label = expression(beta[0] + beta[1]),
+              color = "white", cex = 4.5) + 
+  annotate(geom = "text", x = 82, y = 28, 
+           label = expression(paste(mu[2], "=")),
+              color = "white", cex = 4.5) +
+  annotate(geom = "text", x = 182, y = 14, 
+           label = expression(beta[0] + beta[2]),
+              color = "white", cex = 4.5) + 
+  annotate(geom = "text", x = 182, y = 18, 
+           label = expression(paste(mu[3], "=")),
+              color = "white", cex = 4.5) +
+  geom_vline(xintercept = 65, col = "white", lwd = 1) +
+    geom_vline(xintercept = 165, col = "white", lwd = 1) +
+  ylim(0, 54) +
+  ggtitle("Alternative hypothesis")
+```
+
+ \endcol
+\endcols
+
+
+## Analysis of variance / F-test: Theory  
+
+\blue{Notes...}
+
+- It generalizes the t-test to more than two groups 
+   - Multiple two-sample t-tests $\Rightarrow$ increased Type I error
+
+- ANOVA tests if at least two groups were different from each other (it won’t test which groups were different)
+
+- A two way ANOVA will allow for 2 independent variables - multivariable regression models
+
+
+
+## Analysis of variance / F-test: Theory      
+
+\blue{Test statistic}
+
+- Within group variation
+- Between group variation
+- F statistic: the ratio of between group variation to within group variation
+
+Under the null hypothesis that the group means are the same $\Rightarrow$ the between-group variability will be similar to the within-group variability
+
+
+## Analysis of variance / F-test: Theory  
+
+\begin{center}
+\includegraphics[height=1\textheight]{M_Sample_Tests_files/figure-beamer/dens1.png}
+\end{center}
+
+
+## Analysis of variance / F-test: Theory 
+
+\begin{center}
+\includegraphics[height=1\textheight]{M_Sample_Tests_files/figure-beamer/dens2.png}
+\end{center}
+
+
+## Analysis of variance / F-test: Theory 
+
+Sum of squares due to differences between groups: \newline
+$SS_{between} = \sum_j n_j (\bar{x}_j - \bar{x})^2$
+
+Sum of squares due to variability within groups: \newline
+$SS_{within} = \sum_j\sum_i(x_{ij} - \bar{x}_j)^2$
+
+Total sum of squares:\newline
+$SS_{total} = SS_{between} + SS_{within} = \sum_j\sum_i(x_{ij} - \bar{x})^2 = \sum_j n_j (\bar{x}_j - \bar{x})^2 + \sum_j\sum_i(x_{ij} - \bar{x}_j)^2$
+
+Mean squares:\newline
+$MS_{between} = \frac{SS_{between}}{m-1}$\newline
+$MS_{within} = \frac{SS_{within}}{n-m}$
+
+\blue{Test statistic:} $F = \frac{MS_{between}}{MS_{within}}$
+
+
+## Analysis of variance / F-test: Theory      
+
+\blue{Sampling distribution}
+
+- $F$-distribution with $df_1 = m-1$ and $df_2 = n-m$
+- Critical value and p-value
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($F$) with the critical value or the p-value with $\alpha$
+
+
+
+## Analysis of variance / F-test: Application
+
+\blue{Scenario} 
+
+Is the mean BMI of the students different in groups 1, 2 and 3?
+
+\blue{Hypothesis}
+
+$H_0: \mu_1 = \mu_2 = \mu_3$ \newline
+$H_1: \mu_1 \neq \mu_2$ or $\mu_2 \neq \mu_3$ or $\mu_1 \neq \mu_3$ 
+
+
+## Analysis of variance / F-test: Application
+
+\blue{Collect and visualize data}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=2.5, fig.width=6}
+library(ggplot2)
+library(gridExtra)
+set.seed(2021+2)
+
+BMI1 <- rnorm(50, 24, 6)
+BMI2 <- rnorm(50, 23, 2)
+BMI3 <- rnorm(50, 18, 1)
+id <- 1:50
+df <- data.frame(id, BMI1, BMI2, BMI3)
+
+p1 <- ggplot(df, aes(x=BMI1)) + 
+  geom_histogram(bins = 6, fill = rgb(0.6769,0.4447,0.7114)) +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+p2 <- ggplot(df, aes(x=BMI2)) + 
+  geom_histogram(bins = 6, fill = rgb(0.6769,0.4447,0.7114)) +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+p3 <- ggplot(df, aes(x=BMI3)) + 
+  geom_histogram(bins = 6, fill = rgb(0.6769,0.4447,0.7114)) +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+grid.arrange(p1, p2, p3, nrow = 1)
+```
+
+
+## Analysis of variance / F-test: Application
+
+\blue{Test statistic}
+
+Let's assume that:
+
+- Sample mean of group 1: $\bar{x}_1 = 25.1633$
+- Sample mean of group 2: $\bar{x}_2 = 22.8823$
+- Sample mean of group 2: $\bar{x}_3 = 18.1985$
+- Number of subjects in the groups: $n_1 = n_2 = n_3 = 50$
+
+$SS_{between} = \sum_j n_j (\bar{x}_j - \bar{x})^2 = 1260.8$ and
+$SS_{within} = \sum_j\sum_i(x_{ij} - \bar{x}_j)^2 = 1721.1$
+
+Total sum of squares:\newline
+$SS_{total} = SS_{between} + SS_{within} =  2981.9$
+
+Mean squares:\newline
+$MS_{between} = \frac{SS_{between}}{m-1} = \frac{1260.8}{3-1} = 630.4$ and 
+$MS_{within} = \frac{SS_{within}}{n-m}= \frac{1721.1}{150-3} = 11.7$
+
+$F = \frac{MS_{between}}{MS_{within}} = \frac{630.4}{11.7} = 53.8$
+
+
+## Analysis of variance / F-test: Application
+
+\blue{Degrees of freedom}
+
+$df_1 = m-1 = 3 - 1 = 2$ and $df_2 = n - m = 150 - 3 = 147$
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+\blue{Critical values}
+
+Using ```R``` we get the critical value from the $F$-distribution:\newline
+critical value$_{\alpha}$ = critical value$_{0.05}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qf(p = 0.05, df1 = 2, df2 = 147, lower.tail = FALSE)
+```
+
+
+## Analysis of variance / F-test: Application
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $F$ > critical value$_{\alpha}$
+
+We have 53.8 > 3.06 $\Rightarrow$ we reject the $H_0$
+\newline
+
+\begincols
+  \begincol{0.5\textwidth}
+  
+Using ```R``` we obtain the p-value from the $F$-distribution:
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+pf(q = 53.8, df1 = 2, df2 = 147, 
+   lower.tail = FALSE)
+```
+
+\endcol
+\begincol{0.5\linewidth}
+
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=3, fig.width=5}
+library(ggplot2)
+
+x <- rf(1000000, 2, 147)
+
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= 6.38 , x, 80)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+ labs(y="Density", x = "") +
+  annotate(geom = "text", x = 1.5, y = 0.1, label = ">99%",
+           color = "white", cex = 5) +
+  annotate(geom = "text", x = 6.7, y = 0.05, label = "<0.0001%",
+           color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.9), xlim = c(-0.003, 15), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),    
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(6),
+                     labels=c("53.8"),
+                     guide = guide_axis(n.dodge = 2))
+```
+
+ \endcol
+\endcols
+
+
+
+
+
+ 
+## M-sample Kruskal-Wallis test: Theory   
+
+\blue{Assumptions}
+
+* Within and between groups observations are independent of one another
+
+
+
+## M-sample Kruskal-Wallis test: Theory 
+
+\blue{Scenario} 
+
+Is the distribution of the score values of the students different in groups 1, 2 and 3?
+
+\blue{Connection with linear regression}
+
+$rank(y_i) = \beta_0 + \beta_1x_{1i} + \beta_2x_{2i} + \epsilon_i$, \scriptsize where $x_{1i}$ and $x_{2i}$ indicate whether the subject is in group 2 or 3 \normalsize
+
+$H_0: y_i = \beta_0$ $\Rightarrow$ $H_0: \beta_1 = \beta_2 = 0$
+
+
+\blue{Alternatively}
+
+$H_0:$ the samples (groups) are from identical populations\newline
+$H_1:$ at least one of the samples (groups) comes from a different population than the others
+
+
+## M-sample Kruskal-Wallis test: Theory 
+
+\blue{Test statistic}
+
+- Rank all data from all groups together (assign any tied values the average of the ranks they would have received had they not been tied)
+- Calculate:
+  - if we do not have ties:
+  $H = \frac{12}{n(n + 1)} \sum_{j} n_j \bar{r}_j^2 - 3 (n+1)$, where
+   
+      - $n$ is the total number of observations in all groups
+      - $n_j$ is the number of observations in group $j$
+      - $\bar{r}_j = \frac{\sum_{i=1}^{n_j}r_{ij}}{n_j}$ where $r_{ij}$ is the rank of observation $i$ from group $j$
+          
+  - if we have ties:
+  $H = \frac{H}{1- \frac{\sum_{j}(T_j^3 - T_j)}{(n^3 - n)}}$ where $T_j$ is the number of tied values in group $j$
+
+
+## M-sample Kruskal-Wallis test: Theory 
+
+\blue{Sampling distribution}
+
+- $\chi^2$-distribution with $df = m - 1$, where $m$ is the total number of groups
+- Critical value and p-value
+
+\textit{For small sample size, we can use the exact distribution}
+
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($H$) with the critical values or the p-value with $\alpha$
+
+
+
+
+
+
+## M-sample Kruskal-Wallis test: Application
+
+\blue{Scenario} 
+
+Is the distribution of the score values of the students different in groups 1, 2 and 3?
+
+\blue{Hypothesis}
+
+$H_0:$ the samples (groups) are from identical populations \newline
+$H_1:$ at least one of the samples (groups) comes from a different population than the others
+
+
+## M-sample Kruskal-Wallis test: Application
+
+\blue{Collect and visualize data}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(123)
+x1 <- rnorm(6, 10, 2)
+x2 <- rnorm(4, 9, 2)
+x3 <- rnorm(5, 11, 4)
+
+x <- c(x1, x2, x3)
+id <- c(rep(1, 6), rep(2, 4), rep(3, 5))
+
+res_vec <- c(x1, x2, x3)
+res_rank <- rank(res_vec)
+
+rank1 <- mean(res_rank[1:6])
+rank2 <- mean(res_rank[7:10])
+rank3 <- mean(res_rank[11:15])
+
+
+dat <- data.frame(id, round(res_vec, digits = 2), res_rank, rank_group = round(c(rep(rank1, 6), rep(rank2, 4), rep(rank3, 5)), digits = 2))
+colnames(dat) <- c("Groups", "values", "rank", "mean rank per group")
+
+library(knitr)
+kable(dat)%>%
+  kable_styling(font_size = 9)
+```
+
+
+## M-sample Kruskal-Wallis test: Application
+
+\blue{Hypothesis}
+
+$H_0:$ the samples (groups) are from identical populations \newline
+$H_1:$ at least one of the samples (groups) comes from a different population than the others
+
+\blue{Test statistic}
+
+No ties: 
+
+$H = \frac{12}{n(n + 1)} \sum_{j} n_j \bar{r_j}^2 - 3 (n+1) = \frac{12}{15(15+1)}    (9.17^2 * 6 + 3.25^2 * 4 + 10.40^2 * 5) - 3(15+1) = 6.38$
+
+\blue{Degrees of freedom}
+
+$df = number\ of\ groups - 1 = 3 - 1 = 2$
+
+\blue{Type I error}
+
+$\alpha = 0.05$
+
+
+## M-sample Kruskal-Wallis test: Application
+  
+\blue{Critical values}
+
+Using ```R``` we get the critical values from the exact distribution:\newline
+critical value$_{\alpha}$ = critical value$_{0.05}$
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment=""}
+qchisq(p = 0.05, df = 2, lower.tail = FALSE)
+```
+
+
+## M-sample Kruskal-Wallis test: Application
+
+\blue{Draw conclusions}
+
+We reject the $H_0$ if: 
+
+- $H >$ critical value$_{\alpha}$
+
+We have $6.38 > 5.99$ $\Rightarrow$ we reject the $H_0$
+
+\begincols
+  \begincol{0.5\textwidth}
+
+Using ```R``` we obtain the p-value from the exact distribution:
+
+```{r, echo = TRUE, cache = TRUE, message = FALSE, warning = FALSE, comment = ""}
+pchisq(q = 6.38, df = 2, 
+       lower.tail = FALSE)
+```
+
+\endcol
+\begincol{0.5\linewidth}
+
+\vspace*{1cm}
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, fig.height=3, fig.width=5}
+library(ggplot2)
+
+x <- rchisq(1000000, 2)
+
+
+dat <- with(density(x), data.frame(x, y))
+ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  geom_line(col = "white", lwd = 1) +
+  geom_area(mapping = aes(x = ifelse(x >= 6.38 , x, 80)), 
+            fill = rgb(0.6769,0.4447,0.7114)) +
+ labs(y="Density", x = "") +
+  annotate(geom = "text", x = 1.5, y = 0.1, label = "96%",
+           color = "white", cex = 5) +
+  annotate(geom = "text", x = 6.7, y = 0.01, label = "4%",
+           color = "white", cex = 3) +
+  coord_cartesian(ylim = c(-0.003, 0.5), xlim = c(-0.003, 25), clip="off") +
+  theme(panel.background = element_rect(fill="grey30", colour="grey30"), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),    
+        axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks=c(6.38),
+                     labels=c("6.38"),
+                     guide = guide_axis(n.dodge = 2))
+```
+
+
+ \endcol
+\endcols

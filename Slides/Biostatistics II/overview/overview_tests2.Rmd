@@ -1,0 +1,219 @@
+---
+title: "Biostatistics I: Statistical tests for categorical data and R"
+subtitle: ""
+author: "Eleni-Rosalina Andrinopoulou"
+institute: "Department of Biostatistics, Erasmus Medical Center"
+email: "e.andrinopoulou@erasmusmc.nl"
+twitter: "@erandrinopoulou"
+output:
+  beamer_presentation:
+    template: mytemplate.latex
+    includes:
+      in_header: SlideTemplate.tex
+    keep_tex: yes
+    incremental: false
+classoption: aspectratio=169
+---
+
+  
+```{r setup, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+
+knitr::knit_hooks$set(
+  nospace = function(before, options, envir) {
+    if (before) {
+      knitr::asis_output("\\vspace*{-1.5ex}")
+    }
+  }
+)
+
+knitr::opts_chunk$set(echo = FALSE, comment=NA)
+
+library(survival)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+pbc <- survival::pbc
+pbcseq <- survival::pbcseq
+```
+
+
+
+ 
+## McNemar test
+
+\blue{Paired categorical data}
+
+Is there a difference in the percentage of patients with asthma between
+the placebo and the drug group (matched data)?
+
+
+
+
+## McNemar test
+
+\blue{Scenario}
+
+Is there a difference in the percentage of patients with asthma between the placebo and the drug group (matched data)?
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+set.seed(2021)
+x1 <- sample(0:1, 100, replace = TRUE)
+x2 <- sample(0:1, 100, replace = TRUE)
+
+tab <- table(x1, x2)
+
+tab <- matrix(c("a", "b", "a + b", "c", "d", "c + d", "a + c", "b + d", "n"), 3, 3, byrow = TRUE)
+
+colnames(tab) <- c("Drug (asthma)", "Drug (no asthma)", "Total")
+rownames(tab) <- c("Placebo (asthma)", "Placebo (no asthma)", "Total")
+
+library(knitr)
+kable(tab)
+```
+
+\blue{Hypothesis}
+
+\begincols
+  \begincol{0.6\textwidth}
+
+
+$H_0: p_a + p_b = p_a + p_c$ and $p_c + p_d = p_d + p_b$ \newline
+$H_1: p_a + p_b \neq p_a + p_c$ and $p_c + p_d \neq p_d + p_b$ 
+
+ 
+\endcol
+\begincol{0.2\linewidth}
+
+$H_0: p_b = p_c$\newline
+$H_1: p_b \neq p_c$
+
+ \endcol
+\endcols
+
+## McNemar test: Theory  
+
+\blue{Test statistic}
+
+$X^2 = \frac{(b-c)^2}{b+c}$
+
+\begin{tcolorbox}[colback=EMCdark,
+                  colframe=EMCdark,
+                  width=13cm
+                 ]
+{\color{white} 
+When the values in the contingency table are fairly small a “correction for continuity” may be applied to the test statistic:
+ $X^2 = \frac{(|b-c| - 1)^2}{b+c}$
+}
+\end{tcolorbox}
+
+
+## McNemar test: Theory  
+
+\blue{Sampling distribution}
+
+- $\chi^2$-distribution with $df = 1$
+- Critical value and p-value
+
+\blue{Type I error}
+
+- Normally $\alpha = 0.05$
+
+\blue{Draw conclusions}
+
+- Compare test statistic ($X^2$) with the critical value or the p-value with $\alpha$
+
+
+
+
+
+
+
+## Multiple testing 
+
+- A single statistical test is rarely assumed
+- If we perform $m$ independent tests, what is the probability of at least 1 false positive?
+
+  - P(Making an error) = $\alpha$
+  - P(Not making an error) = $1 - \alpha$
+  - P(Not making an error in $m$ tests) = $(1 - \alpha)^m$
+  - P(Making at least 1 error in $m$ tests) = $1 - (1 - \alpha)^m$
+
+ 
+## Multiple testing 
+ 
+\blue{Visualize this...}
+\vspace*{-1cm}
+```{r, echo = FALSE, fig.height=4, fig.width=5}
+m <- c(1:100)
+alpha <- 0.05
+y <- 1 - (1 - alpha)^m 
+plot(m, y, xlab = "Hypothesis tests", ylab = "Probability of at least 1 false positive", pch = 16,
+     cex.axis = 0.5, cex.lab = 0.7)
+```
+
+ 
+## Multiple testing
+
+Methods to adjust for multiple testing:
+
+- \textbf{\textcolor{EMC60}{Bonferroni adjustment}}: multiply the number of simultaneously tested hypothesis, e.g. $p-value = min(p-value * m, 1)$ or adjust the significant level to $\alpha = \alpha / m$
+- \textbf{\textcolor{EMC60}{Holm adjustment}}: $\alpha_i = \frac{\alpha}{m - i + 1}$, where $i$ is the order of the hypothesis - we start from the smallest to the largest p-value
+- \textbf{\textcolor{EMC60}{Hochberg adjustment}}: $\alpha_i = \frac{\alpha}{m - i + 1}$, where $i$ is the order of the hypothesis - we start from the largest p-value
+
+ 
+
+##  apply Family
+
+Manipulate \blue{vectors} or slices of data from \blue{matrices}, \blue{arrays}, \blue{data frames} and \blue{lists} in a repetitive way 
+
+\vspace*{0.7cm}
+
+  - An aggregating function, like for example the mean, or the sum
+  - Other transforming or subsetting functions
+  - Other vectorized functions, which return more complex structures like lists, vectors and matrices
+  
+  
+## apply Family  
+
+\blue{apply(), lapply() , sapply(), tapply(), mapply()}
+
+\vspace*{3ex} 
+
+\textbf{But how and when should we use these?}
+
+
+
+## Control Flow
+
+Sometimes we want to perform a particular action/manipulation multiple times
+and/or on several objects. 
+
+To repeat the same action we can specify a loop:
+
+  - \blue{\texttt{for}} each element of a vector, a list, ..., or
+  - \blue{\texttt{while}} a particular condition is fulfilled
+
+
+Sometimes, we may want to execute code only if a certain condition is fulfilled.
+
+To evaluate a condition:
+
+  - \blue{\texttt{if()...else/ifelse()}} execute code only if a certain condition is fulfilled.
+
+
+## Functions
+
+What are functions?
+
+- a group of (organized) **R** commands
+- a (small) program with flexible (= not pre-specified) input
+
+\blue{Almost all commands in **R** are functions!}
+
