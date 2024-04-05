@@ -19,23 +19,94 @@ In this webpage, you can find the material of the Biostatistics I and II (NIHES 
 ## Slides 
  
 [Introduction](Slides\Biostatistics I\Introduction.pdf)
+
 [Basics](Slides\Biostatistics I\Basics.pdf)
+
 [Common_Objects](Slides\Biostatistics I\Common_Objects.pdf)
+
 [Indexing_Subsetting](Slides\Biostatistics I\Indexing_Subsetting.pdf)
-[Data_Transformation_Exploration_Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
-[Data_Transformation_Exploration_Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
+
+[Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
+
+[Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
+
 [Correlation](Slides\Biostatistics I\Correlation.pdf)
-[Hypothesis_Testing](Slides\Biostatistics I\Hypothesis_Testing.pdf)
+ 
 
 ## Demos
+
+### Code
+
+[Basics](Demos\Biostatistics I\01_Basics.R)
+
+[Importing Saving](Demos\Biostatistics I\02_Importing_Saving.R)
+
+[Common Objects](Demos\Biostatistics I\03_Common_Objects.R)
+
+[Indexing Subsetting](Demos\Biostatistics I\04_Indexing_Subsetting.R)
+
+[Data Transformation](Demos\Biostatistics I\05_Data_Transformation.R)
+
+[Data Exploration](Demos\Biostatistics I\06_Data_Exploration.R)
+
+[Data Visualization](Demos\Biostatistics I\07_Data_Visualization.R)
+
+[Distribution Functions](Demos\Biostatistics I\08_Distribution_Functions.R)
+
+
+### Output
+
+[Basics](Demos\Biostatistics I\01_Basics.html)
+
+[Importing Saving](Demos\Biostatistics I\02_Importing_Saving.html)
+
+[Common Objects](Demos\Biostatistics I\03_Common_Objects.html)
+
+[Indexing Subsetting](Demos\Biostatistics I\04_Indexing_Subsetting.html)
+
+[Data Transformation](Demos\Biostatistics I\05_Data_Transformation.html)
+
+[Data Exploration](Demos\Biostatistics I\06_Data_Exploration.html)
+
+[Data Visualization](Demos\Biostatistics I\07_Data_Visualization.html)
+
+[Distribution Functions](Demos\Biostatistics I\08_Distribution_Functions.html)
+
+
+## Practicals
 
 ## Practicals
 
 
 
-# Introduction to R  
+# Statistical tests for continuous data
  
 ## Slides 
+
+[One Sample Tests](Slides\Biostatistics I\One_Sample_Tests.pdf)
+
+[Two Sample Independent Tests](Slides\Biostatistics I\Two_Sample_Ind_Tests.pdf)
+
+[Two Sample Dependent Tests](Slides\Biostatistics I\Two_Sample_Dep_Tests.pdf)
+
+[M Sample Tests](Slides\Biostatistics I\M_Sample_Tests.pdf)
+
+[Correlation Tests](Slides\Biostatistics I\Correlation_Tests.pdf)
+
+
+
+## Demos
+
+
+
+
+# Statistical tests for continuous data
+ 
+## Slides 
+
+[Proportion Tests](Slides\Biostatistics I\Proportion_Tests.pdf)
+
+[ChiSquare FisherExact Tests](Slides\Biostatistics I\ChiSquare_FisherExact_Tests.pdf)
 
 
 ## Demos

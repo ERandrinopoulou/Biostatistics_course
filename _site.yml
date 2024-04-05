@@ -3,5 +3,5 @@ output_dir: "."
 navbar:
   title: "Biostatistics Course"
   left:
-    - text: "Home"
+    - text: ""
       href: index.html
