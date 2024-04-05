@@ -13,12 +13,31 @@ output:
 
 
 In this webpage, you can find the material of the Biostatistics I and II (NIHES CK020 and CK030) courses. In particular, these consist of the Introduction to R and Statistical tests part.
+
+# Introduction to R  
  
-Introduction to R 
+## Slides 
  
 [Introduction](Slides\Biostatistics I\Introduction.pdf)
+[Basics](Slides\Biostatistics I\Basics.pdf)
+[Common_Objects](Slides\Biostatistics I\Common_Objects.pdf)
+[Indexing_Subsetting](Slides\Biostatistics I\Indexing_Subsetting.pdf)
+[Data_Transformation_Exploration_Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
+[Data_Transformation_Exploration_Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
+[Correlation](Slides\Biostatistics I\Correlation.pdf)
+[Hypothesis_Testing](Slides\Biostatistics I\Hypothesis_Testing.pdf)
 
-Statistical tests
+## Demos
 
-<a href="Slides/Biostatistics I/Introduction.pdf" class="image fit"><img src="images/marr_pic.jpg" alt=""></a>
+## Practicals
 
+
+
+# Introduction to R  
+ 
+## Slides 
+
+
+## Demos
+
+## Practicals
