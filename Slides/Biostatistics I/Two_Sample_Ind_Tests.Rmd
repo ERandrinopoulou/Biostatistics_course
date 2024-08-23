@@ -561,7 +561,7 @@ If \textbf{one-tailed}: use either $U_1$ or $U_2$ for the test statistic ($U$) d
 
 \blue{Sampling distribution}
 
-\textcolor{EMC60}{For large sample size:} we can use the normal approximation, that is, $W$ is normally distributed\newline
+\textcolor{EMC60}{For large sample size:} we can use the normal approximation, that is, $U$ is normally distributed\newline
 $\mu_U=\frac{n_1n_2}{2}$\newline
 $\sigma_U = \sqrt{ \frac{n_1n_2(n_2 + n_1 + 1)}{12}}$\newline
 If there are ties in ranks, we should use:\newline
