@@ -102,9 +102,9 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 - [Distribution Functions](Practicals\Biostatistics I\05_Distribution_Functions.html)
 
-- [The Apply Family](Practicals\Biostatistics II\The_Apply_Family.html)
+- [The Apply Family](Practicals\Biostatistics II\Introduction to R\The_Apply_Family.html)
 
-- [Extra Programming Examples](Practicals\Biostatistics II\Extra_Programming_Examples.html)
+- [Extra Programming Examples](Practicals\Biostatistics II\Introduction to R\Extra_Programming_Examples.html)
 
 
 </div>
@@ -142,17 +142,17 @@ An overview of the statistical tests can be found here:
 
 #### Code
 
-- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.R)
+- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical tests\Statistical_Tests_Continuous_Data.R)
 
 
 #### Output
 
-- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.html)
+- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical tests\Statistical_Tests_Continuous_Data.html)
 
 
 ### Practicals
 
-- [Statistical Tests Continuous Data](Practicals\Biostatistics I\Statistical_Tests_Continuous_Data.html)
+- [Statistical Tests Continuous Data](Practicals\Biostatistics I\Statistical tests\Statistical_Tests_Continuous_Data.html)
 
 
 ## Categorical data
@@ -184,9 +184,9 @@ An overview of the statistical tests can be found here:
 
 ### Practicals
 
-- [Statistical Tests Categorical Data partI](Practicals\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
+- [Statistical Tests Categorical Data partI](Practicals\Biostatistics I\Statistical tests\Statistical_Tests_Categorical_Data_partI.html)
 
 
-- [Statistical Tests Categorical Data partII](Practicals\Biostatistics II\Statistical_Tests_Categorical_Data_partII.html)
+- [Statistical Tests Categorical Data partII](Practicals\Biostatistics II\Statistical tests\Statistical_Tests_Categorical_Data_partII.html)
 
 </div>
