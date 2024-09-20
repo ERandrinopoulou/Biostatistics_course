@@ -172,7 +172,7 @@ An overview of the statistical tests can be found here:
 - [Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.R)
 
 
-- [Statistical Tests Categorical Data partII](Demos\Biostatistics II\Statistical_Tests_Categorical_Data_partIÌ.R)
+- [Statistical Tests Categorical Data partII](Demos\Biostatistics II\Statistical_Tests_Categorical_Data_partII.R)
 
 #### Output
 
