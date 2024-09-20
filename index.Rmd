@@ -1,6 +1,6 @@
 ---
 title: "Biostatistics Course"
-author: "Eleni-Rosalina Andrinopoulou, Department of Biostatistics, Erasmus Medical Center"
+author: "Eleni-Rosalina Andrinopoulou, Department of Epidemiology and Department of Biostatistics, Erasmus Medical Center"
 date: "`r Sys.setenv(LANG = 'en_US.UTF-8'); format(Sys.Date(), '%d %B %Y')`"
 output: 
    html_document:
@@ -10,166 +10,182 @@ output:
      includes:
          after_body: footerEA.html
 ---
-
+<style>
+  .list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    background-color: #4d4d4d;
+  }
+</style>
 
 In this webpage, you can find the material of the Biostatistics I and II (NIHES CK020 and CK030) courses. In particular, these consist of the Introduction to R and Statistical tests part.
 
+
+<div style="border:1px; border-style:solid; padding: 1em; border-color: #ffffff;
+background: rgba(109, 121, 172, 0.4); color:black ">
+
 # Introduction to R  
  
-## Slides 
+### Slides 
  
-[Introduction](Slides\Biostatistics I\Introduction.pdf)
+- [Introduction](Slides\Biostatistics I\Introduction.pdf)
 
-[Basics](Slides\Biostatistics I\Basics.pdf)
+- [Basics](Slides\Biostatistics I\Basics.pdf)
 
-[Common_Objects](Slides\Biostatistics I\Common_Objects.pdf)
+- [Common_Objects](Slides\Biostatistics I\Common_Objects.pdf)
 
-[Indexing_Subsetting](Slides\Biostatistics I\Indexing_Subsetting.pdf)
+- [Indexing_Subsetting](Slides\Biostatistics I\Indexing_Subsetting.pdf)
 
-[Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
+- [Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
 
-[Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
+- [Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
 
-[Correlation](Slides\Biostatistics I\Correlation.pdf)
+- [Correlation](Slides\Biostatistics I\Correlation.pdf)
  
+- [The Apply Family](Slides\Biostatistics I\The_Apply_Family.pdf)
 
-[The Apply Family](Slides\Biostatistics I\The_Apply_Family.pdf)
-
-## Demos
+### Demos
 
 #### Code
 
-[Basics](Demos\Biostatistics I\01_Basics.R)
+- [Basics](Demos\Biostatistics I\01_Basics.R)
 
-[Importing Saving](Demos\Biostatistics I\02_Importing_Saving.R)
+- [Importing Saving](Demos\Biostatistics I\02_Importing_Saving.R)
 
-[Common Objects](Demos\Biostatistics I\03_Common_Objects.R)
+- [Common Objects](Demos\Biostatistics I\03_Common_Objects.R)
 
-[Indexing Subsetting](Demos\Biostatistics I\04_Indexing_Subsetting.R)
+- [Indexing Subsetting](Demos\Biostatistics I\04_Indexing_Subsetting.R)
 
-[Data Transformation](Demos\Biostatistics I\05_Data_Transformation.R)
+- [Data Transformation](Demos\Biostatistics I\05_Data_Transformation.R)
 
-[Data Exploration](Demos\Biostatistics I\06_Data_Exploration.R)
+- [Data Exploration](Demos\Biostatistics I\06_Data_Exploration.R)
 
-[Data Visualization](Demos\Biostatistics I\07_Data_Visualization.R)
+- [Data Visualization](Demos\Biostatistics I\07_Data_Visualization.R)
 
-[Distribution Functions](Demos\Biostatistics I\08_Distribution_Functions.R)
+- [Distribution Functions](Demos\Biostatistics I\08_Distribution_Functions.R)
 
+- [The Apply Family](Demos\Biostatistics I\The_Apply_Family.R)
 
-[The Apply Family](Demos\Biostatistics I\The_Apply_Family.R)
-
-[Extra Programming Examples](Demos\Biostatistics I\Extra_Programming_Examples.R)
+- [Extra Programming Examples](Demos\Biostatistics I\Extra_Programming_Examples.R)
 
 
 #### Output
 
-[Basics](Demos\Biostatistics I\01_Basics.html)
+- [Basics](Demos\Biostatistics I\01_Basics.html)
 
-[Importing Saving](Demos\Biostatistics I\02_Importing_Saving.html)
+- [Importing Saving](Demos\Biostatistics I\02_Importing_Saving.html)
 
-[Common Objects](Demos\Biostatistics I\03_Common_Objects.html)
+- [Common Objects](Demos\Biostatistics I\03_Common_Objects.html)
 
-[Indexing Subsetting](Demos\Biostatistics I\04_Indexing_Subsetting.html)
+- [Indexing Subsetting](Demos\Biostatistics I\04_Indexing_Subsetting.html)
 
-[Data Transformation](Demos\Biostatistics I\05_Data_Transformation.html)
+- [Data Transformation](Demos\Biostatistics I\05_Data_Transformation.html)
 
-[Data Exploration](Demos\Biostatistics I\06_Data_Exploration.html)
+- [Data Exploration](Demos\Biostatistics I\06_Data_Exploration.html)
 
-[Data Visualization](Demos\Biostatistics I\07_Data_Visualization.html)
+- [Data Visualization](Demos\Biostatistics I\07_Data_Visualization.html)
 
-[Distribution Functions](Demos\Biostatistics I\08_Distribution_Functions.html)
+- [Distribution Functions](Demos\Biostatistics I\08_Distribution_Functions.html)
 
+- [The Apply Family](Demos\Biostatistics I\The_Apply_Family.html)
 
-[The Apply Family](Demos\Biostatistics I\The_Apply_Family.html)
-
-[Extra Programming Examples](Demos\Biostatistics I\Extra_Programming_Examples.html)
-
-
-## Practicals
-
-[Importing Saving](Practicals\Biostatistics I\01_Importing_Saving.html)
-
-[Common Objects](Practicals\Biostatistics I\02_Common_Objects.html)
-
-[Indexing Subsetting](Practicals\Biostatistics I\03_Indexing_Subsetting.html)
-
-[Data Transformation Exploration Visualization](Practicals\Biostatistics I\04_Data_Transformation_Exploration_Visualization.html)
-
-[Distribution Functions](Practicals\Biostatistics I\05_Distribution_Functions.html)
+- [Extra Programming Examples](Demos\Biostatistics I\Extra_Programming_Examples.html)
 
 
+### Practicals
 
-[The Apply Family](Practicals\Biostatistics I\The_Apply_Family.html)
+- [Importing Saving](Practicals\Biostatistics I\01_Importing_Saving.html)
 
-[Extra Programming Examples](Practicals\Biostatistics I\Extra_Programming_Examples.html)
+- [Common Objects](Practicals\Biostatistics I\02_Common_Objects.html)
+
+- [Indexing Subsetting](Practicals\Biostatistics I\03_Indexing_Subsetting.html)
+
+- [Data Transformation Exploration Visualization](Practicals\Biostatistics I\04_Data_Transformation_Exploration_Visualization.html)
+
+- [Distribution Functions](Practicals\Biostatistics I\05_Distribution_Functions.html)
+
+- [The Apply Family](Practicals\Biostatistics I\The_Apply_Family.html)
+
+- [Extra Programming Examples](Practicals\Biostatistics I\Extra_Programming_Examples.html)
 
 
+</div>
 
 
-# Statistical tests for continuous data
+\
+
+
+<div style="border:1px; border-style:solid; padding: 1em; border-color: #ffffff;
+background: rgba(109, 121, 172, 0.4); color:black ">
+
+# Statistical tests
+
+An overview of the statistical tests can be found here: [Statistical tests](Notebook\Statistical tests overview\Outline_Notes.html) 
+
  
-## Slides 
+ 
+## Continuous data
+ 
+### Slides 
 
-[One Sample Tests](Slides\Biostatistics I\One_Sample_Tests.pdf)
+- [One Sample Tests](Slides\Biostatistics I\One_Sample_Tests.pdf)
 
-[Two Sample Independent Tests](Slides\Biostatistics I\Two_Sample_Ind_Tests.pdf)
+- [Two Sample Independent Tests](Slides\Biostatistics I\Two_Sample_Ind_Tests.pdf)
 
-[Two Sample Dependent Tests](Slides\Biostatistics I\Two_Sample_Dep_Tests.pdf)
+- [Two Sample Dependent Tests](Slides\Biostatistics I\Two_Sample_Dep_Tests.pdf)
 
-[M Sample Tests](Slides\Biostatistics I\M_Sample_Tests.pdf)
+- [M Sample Tests](Slides\Biostatistics I\M_Sample_Tests.pdf)
 
-[Correlation Tests](Slides\Biostatistics I\Correlation_Tests.pdf)
+- [Correlation Tests](Slides\Biostatistics I\Correlation_Tests.pdf)
 
 
-## Demos
+### Demos
 
 #### Code
 
-[Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.R)
+- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.R)
 
 
 #### Output
 
-[Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.html)
+- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.html)
 
 
-## Practicals
+### Practicals
 
-[Statistical Tests Continuous Data](Practicals\Biostatistics I\Statistical_Tests_Continuous_Data.html)
+- [Statistical Tests Continuous Data](Practicals\Biostatistics I\Statistical_Tests_Continuous_Data.html)
 
 
-# Statistical tests for categorical data
+## Categorical data
  
-## Slides 
+### Slides 
 
-[Proportion Tests](Slides\Biostatistics I\Proportion_Tests.pdf)
+- [Proportion Tests](Slides\Biostatistics I\Proportion_Tests.pdf)
 
-[ChiSquare FisherExact Tests](Slides\Biostatistics I\ChiSquare_FisherExact_Tests.pdf)
+- [ChiSquare FisherExact Tests](Slides\Biostatistics I\ChiSquare_FisherExact_Tests.pdf)
 
+- [McNemar Test](Slides\Biostatistics I\McNemar_Test.pdf)
 
-[McNemar Test](Slides\Biostatistics I\McNemar_Test.pdf)
-
-## Demos
+### Demos
 
 #### Code
 
-[Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.R)
+- [Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.R)
 
 
-[Statistical Tests Categorical Data partII](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partIÌ.R)
+- [Statistical Tests Categorical Data partII](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partIÌ.R)
 
 #### Output
 
-[Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
+- [Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
 
 
-[Statistical Tests Categorical Data partII](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partIÌ.html)
+- [Statistical Tests Categorical Data partII](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partIÌ.html)
 
 
-## Practicals
+### Practicals
 
-[Statistical Tests Categorical Data partI](Practicals\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
+- [Statistical Tests Categorical Data partI](Practicals\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
 
 
-[Statistical Tests Categorical Data partII](Practicals\Biostatistics I\Statistical_Tests_Categorical_Data_partII.html)
+- [Statistical Tests Categorical Data partII](Practicals\Biostatistics I\Statistical_Tests_Categorical_Data_partII.html)
 
+</div>
