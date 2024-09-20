@@ -118,7 +118,8 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 # Statistical tests
 
-An overview of the statistical tests can be found here: [Statistical tests](Notebook\Statistical tests overview\Outline_Notes.html) 
+An overview of the statistical tests can be found here: 
+[Statistical tests](Outline_Notes.html) 
 
  
  
@@ -162,7 +163,7 @@ An overview of the statistical tests can be found here: [Statistical tests](Note
 
 - [ChiSquare FisherExact Tests](Slides\Biostatistics I\ChiSquare_FisherExact_Tests.pdf)
 
-- [McNemar Test](Slides\Biostatistics I\McNemar_Test.pdf)
+- [McNemar Test](Slides\Biostatistics II\McNemar_Test.pdf)
 
 ### Demos
 
@@ -178,7 +179,7 @@ An overview of the statistical tests can be found here: [Statistical tests](Note
 - [Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
 
 
-- [Statistical Tests Categorical Data partII](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partIÌ.html)
+- [Statistical Tests Categorical Data partII](Demos\Biostatistics II\Statistical_Tests_Categorical_Data_partIÌ.html)
 
 
 ### Practicals
@@ -186,6 +187,6 @@ An overview of the statistical tests can be found here: [Statistical tests](Note
 - [Statistical Tests Categorical Data partI](Practicals\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
 
 
-- [Statistical Tests Categorical Data partII](Practicals\Biostatistics I\Statistical_Tests_Categorical_Data_partII.html)
+- [Statistical Tests Categorical Data partII](Practicals\Biostatistics II\Statistical_Tests_Categorical_Data_partII.html)
 
 </div>
