@@ -22,7 +22,7 @@ In this webpage, you can find the material of the Biostatistics I and II (NIHES 
 <div style="border:1px; border-style:solid; padding: 1em; border-color: #ffffff;
 background: rgba(109, 121, 172, 0.4); color:black ">
 
-# Introduction to R  
+# Introduction to R  {.tabset} 
  
 ### _Slides_
  
@@ -116,7 +116,7 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 <div style="border:1px; border-style:solid; padding: 1em; border-color: #ffffff;
 background: rgba(109, 121, 172, 0.4); color:black ">
 
-# Statistical tests
+# Statistical tests {.tabset}
 
 An overview of the statistical tests can be found here: 
 [Statistical tests](Outline_Notes.html) 
