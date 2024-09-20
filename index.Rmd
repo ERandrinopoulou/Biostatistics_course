@@ -142,12 +142,12 @@ An overview of the statistical tests can be found here:
 
 #### Code
 
-- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical tests\Statistical_Tests_Continuous_Data.R)
+- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.R)
 
 
 #### Output
 
-- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical tests\Statistical_Tests_Continuous_Data.html)
+- [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.html)
 
 
 ### Practicals
