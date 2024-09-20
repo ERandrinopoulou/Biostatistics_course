@@ -1,6 +1,6 @@
 ---
 title: "Biostatistics Course"
-author: "Eleni-Rosalina Andrinopoulou, Department of Epidemiology and Department of Biostatistics, Erasmus Medical Center"
+author: "[Eleni-Rosalina Andrinopoulou](https://www.erandrinopoulou.com/), Department of Epidemiology and Department of Biostatistics, Erasmus Medical Center"
 date: "`r Sys.setenv(LANG = 'en_US.UTF-8'); format(Sys.Date(), '%d %B %Y')`"
 output: 
    html_document:
