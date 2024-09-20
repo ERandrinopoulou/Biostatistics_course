@@ -24,7 +24,7 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 # Introduction to R  
  
-### Slides 
+### _Slides_
  
 - [Introduction](Slides\Biostatistics I\Introduction.pdf)
 
@@ -42,9 +42,9 @@ background: rgba(109, 121, 172, 0.4); color:black ">
  
 - [The Apply Family](Slides\Biostatistics II\The_Apply_Family.pdf)
 
-### Demos
+### _Demos_
 
-#### Code
+#### _Code_
 
 - [Basics](Demos\Biostatistics I\01_Basics.R)
 
@@ -67,7 +67,7 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 - [Extra Programming Examples](Demos\Biostatistics II\Extra_Programming_Examples.R)
 
 
-#### Output
+#### _Output_
 
 - [Basics](Demos\Biostatistics I\01_Basics.html)
 
@@ -90,7 +90,7 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 - [Extra Programming Examples](Demos\Biostatistics II\Extra_Programming_Examples.html)
 
 
-### Practicals
+### _Practicals_
 
 - [Importing Saving](Practicals\Biostatistics I\Introduction to R\01_Importing_Saving.html)
 
@@ -125,7 +125,7 @@ An overview of the statistical tests can be found here:
  
 ## Continuous data
  
-### Slides 
+### _Slides_
 
 - [One Sample Tests](Slides\Biostatistics I\One_Sample_Tests.pdf)
 
@@ -138,26 +138,26 @@ An overview of the statistical tests can be found here:
 - [Correlation Tests](Slides\Biostatistics I\Correlation_Tests.pdf)
 
 
-### Demos
+### _Demos_
 
-#### Code
+#### _Code_
 
 - [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.R)
 
 
-#### Output
+#### _Output_
 
 - [Statistical Tests Continuous Data](Demos\Biostatistics I\Statistical_Tests_Continuous_Data.html)
 
 
-### Practicals
+### _Practicals_
 
 - [Statistical Tests Continuous Data](Practicals\Biostatistics I\Statistical tests\Statistical_Tests_Continuous_Data.html)
 
 
 ## Categorical data
  
-### Slides 
+### _Slides_ 
 
 - [Proportion Tests](Slides\Biostatistics I\Proportion_Tests.pdf)
 
@@ -165,9 +165,9 @@ An overview of the statistical tests can be found here:
 
 - [McNemar Test](Slides\Biostatistics II\McNemar_Test.pdf)
 
-### Demos
+### _Demos_
 
-#### Code
+#### _Code_
 
 - [Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.R)
 
@@ -179,10 +179,10 @@ An overview of the statistical tests can be found here:
 - [Statistical Tests Categorical Data partI](Demos\Biostatistics I\Statistical_Tests_Categorical_Data_partI.html)
 
 
-- [Statistical Tests Categorical Data partII](Demos\Biostatistics II\Statistical_Tests_Categorical_Data_partIÌ.html)
+- [Statistical Tests Categorical Data partII](Demos\Biostatistics II\Statistical_Tests_Categorical_Data_partII.html)
 
 
-### Practicals
+### _Practicals_
 
 - [Statistical Tests Categorical Data partI](Practicals\Biostatistics I\Statistical tests\Statistical_Tests_Categorical_Data_partI.html)
 
