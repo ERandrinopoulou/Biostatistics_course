@@ -92,15 +92,15 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 ### Practicals
 
-- [Importing Saving](Practicals\Biostatistics I\01_Importing_Saving.html)
+- [Importing Saving](Practicals\Biostatistics I\Introduction to R\01_Importing_Saving.html)
 
-- [Common Objects](Practicals\Biostatistics I\02_Common_Objects.html)
+- [Common Objects](Practicals\Biostatistics I\Introduction to R\02_Common_Objects.html)
 
-- [Indexing Subsetting](Practicals\Biostatistics I\03_Indexing_Subsetting.html)
+- [Indexing Subsetting](Practicals\Biostatistics I\Introduction to R\03_Indexing_Subsetting.html)
 
-- [Data Transformation Exploration Visualization](Practicals\Biostatistics I\04_Data_Transformation_Exploration_Visualization.html)
+- [Data Transformation Exploration Visualization](Practicals\Biostatistics I\Introduction to R\04_Data_Transformation_Exploration_Visualization.html)
 
-- [Distribution Functions](Practicals\Biostatistics I\05_Distribution_Functions.html)
+- [Distribution Functions](Practicals\Biostatistics I\Introduction to R\05_Distribution_Functions.html)
 
 - [The Apply Family](Practicals\Biostatistics II\Introduction to R\The_Apply_Family.html)
 
