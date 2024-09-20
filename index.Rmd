@@ -40,7 +40,7 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 - [Correlation](Slides\Biostatistics I\Correlation.pdf)
  
-- [The Apply Family](Slides\Biostatistics I\The_Apply_Family.pdf)
+- [The Apply Family](Slides\Biostatistics II\The_Apply_Family.pdf)
 
 ### Demos
 
@@ -62,9 +62,9 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 - [Distribution Functions](Demos\Biostatistics I\08_Distribution_Functions.R)
 
-- [The Apply Family](Demos\Biostatistics I\The_Apply_Family.R)
+- [The Apply Family](Demos\Biostatistics II\The_Apply_Family.R)
 
-- [Extra Programming Examples](Demos\Biostatistics I\Extra_Programming_Examples.R)
+- [Extra Programming Examples](Demos\Biostatistics II\Extra_Programming_Examples.R)
 
 
 #### Output
@@ -85,9 +85,9 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 - [Distribution Functions](Demos\Biostatistics I\08_Distribution_Functions.html)
 
-- [The Apply Family](Demos\Biostatistics I\The_Apply_Family.html)
+- [The Apply Family](Demos\Biostatistics II\The_Apply_Family.html)
 
-- [Extra Programming Examples](Demos\Biostatistics I\Extra_Programming_Examples.html)
+- [Extra Programming Examples](Demos\Biostatistics II\Extra_Programming_Examples.html)
 
 
 ### Practicals
@@ -102,9 +102,9 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 - [Distribution Functions](Practicals\Biostatistics I\05_Distribution_Functions.html)
 
-- [The Apply Family](Practicals\Biostatistics I\The_Apply_Family.html)
+- [The Apply Family](Practicals\Biostatistics II\The_Apply_Family.html)
 
-- [Extra Programming Examples](Practicals\Biostatistics I\Extra_Programming_Examples.html)
+- [Extra Programming Examples](Practicals\Biostatistics II\Extra_Programming_Examples.html)
 
 
 </div>
