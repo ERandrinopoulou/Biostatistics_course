@@ -31,9 +31,9 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 - [Basics](Slides\Biostatistics I\Basics.pdf)
 
-- [Common_Objects](Slides\Biostatistics I\Common_Objects.pdf)
+- [Common Objects](Slides\Biostatistics I\Common_Objects.pdf)
 
-- [Indexing_Subsetting](Slides\Biostatistics I\Indexing_Subsetting.pdf)
+- [Indexing Subsetting](Slides\Biostatistics I\Indexing_Subsetting.pdf)
 
 - [Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
 
