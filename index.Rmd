@@ -36,9 +36,9 @@ background: rgba(109, 121, 172, 0.4); color:black ">
 
 - [Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
 
-- [Data Transformation Exploration Visualization](Slides\Biostatistics I\Data_Transformation_Exploration_Visualization.pdf)
-
 - [Correlation](Slides\Biostatistics I\Correlation.pdf)
+
+- [Hypothesis Testing](Slides\Biostatistics I\Hypothesis_Testing.pdf)
  
 - [The Apply Family](Slides\Biostatistics II\The_Apply_Family.pdf)
 
