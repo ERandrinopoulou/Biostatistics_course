@@ -5,6 +5,7 @@ date: "`r Sys.setenv(LANG = 'en_US.UTF-8'); format(Sys.Date(), '%d %B %Y')`"
 output: 
    html_document:
      toc: true
+     toc_depth: 2
      toc_float:
        collapsed: false
      includes:
